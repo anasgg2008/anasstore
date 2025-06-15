@@ -2,159 +2,240 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>واجهة البيع</title>
   <style>
     body {
-      font-family: sans-serif;
       background-color: #111;
       color: white;
+      font-family: sans-serif;
       padding: 20px;
-      text-align: center;
-    }
-    .triangle-grid {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
-      margin-bottom: 20px;
+      min-height: 100vh;
+      justify-content: flex-start;
     }
-    .row {
+    h1 {
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    .triangle-container {
       display: flex;
+      flex-wrap: wrap;
+      width: 320px;
       justify-content: center;
-      gap: 20px;
+      gap: 10px;
+      margin-bottom: 20px;
+      position: relative;
     }
     .box {
       background-color: #222;
-      padding: 20px;
       border-radius: 15px;
-      width: 200px;
-      font-size: 18px;
-    }
-    select, input {
-      width: 100%;
-      padding: 10px;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       font-size: 16px;
-      margin-top: 10px;
+      cursor: default;
+      user-select: none;
+      box-shadow: 0 0 8px #444;
     }
-    button {
-      padding: 10px 30px;
-      font-size: 18px;
+    .box label {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    select, input[type=number] {
+      width: 80px;
+      padding: 5px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      text-align: center;
+      background-color: #333;
+      color: white;
+    }
+    #saveBtn {
       background-color: red;
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 15px;
+      width: 320px;
+      height: 45px;
+      font-size: 20px;
       cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 0 10px red;
+      transition: background-color 0.3s;
     }
-    .results {
+    #saveBtn:hover {
+      background-color: #b30000;
+    }
+    .stats {
       margin-top: 20px;
       font-size: 18px;
+      width: 320px;
+      text-align: center;
+      background-color: #222;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 0 8px #444;
     }
-    .menu {
+    /* شكل المثلث */
+    .triangle-container {
+      position: relative;
+      width: 320px;
+      height: 190px;
+    }
+    .box:nth-child(1) {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      display: flex;
-      gap: 10px;
+      top: 0;
+      left: 110px;
     }
-    .menu button {
-      padding: 5px 10px;
-      font-size: 14px;
+    .box:nth-child(2) {
+      position: absolute;
+      top: 100px;
+      left: 0;
+    }
+    .box:nth-child(3) {
+      position: absolute;
+      top: 100px;
+      left: 220px;
     }
   </style>
 </head>
 <body>
-  <div class="menu">
-    <button onclick="window.location.href='products.html'">➕ إضافة منتج</button>
-    <button onclick="window.location.href='sales.html'">📅 سجل المبيعات</button>
-    <button onclick="toggleDarkMode()">🌓 وضع داكن</button>
-  </div>
 
   <h1>واجهة البيع</h1>
 
-  <div class="triangle-grid">
-    <div class="row">
-      <div class="box">
-        اختر المنتج
-        <select id="productSelect" onchange="updateTotal()">
-          <option disabled selected>اختر</option>
-        </select>
-      </div>
+  <div class="triangle-container">
+    <div class="box">
+      <label for="productSelect">اختر المنتج</label>
+      <select id="productSelect">
+        <option value="">-- اختر --</option>
+      </select>
     </div>
-    <div class="row">
-      <div class="box">
-        العدد
-        <input type="number" id="quantityInput" value="1" min="1" oninput="updateTotal()" />
-      </div>
-      <div class="box">
-        إجمالي السعر
-        <div id="totalPrice">0</div>
-      </div>
+    <div class="box">
+      <label for="quantityInput">العدد</label>
+      <input type="number" id="quantityInput" min="1" value="1" />
+    </div>
+    <div class="box">
+      <label for="priceInput">سعر البيع</label>
+      <input type="number" id="priceInput" min="1" />
     </div>
   </div>
 
-  <button onclick="saveSale()">💾 احفظ</button>
+  <button id="saveBtn">احفظ</button>
 
-  <div class="results">
-    <div>الربح الصافي: <span id="profit">0</span> ل.س</div>
-    <div>عدد الأغراض: <span id="itemCount">0</span></div>
-    <div>إجمالي المبيعات: <span id="totalSales">0</span> ل.س</div>
+  <div class="stats" id="stats">
+    <p>الربح الصافي: <span id="totalProfit">0</span> ل.س</p>
+    <p>عدد المبيعات: <span id="totalSales">0</span></p>
+    <p>عدد الأغراض: <span id="totalItems">0</span></p>
   </div>
 
   <script>
+    // تسجيل دخول إجباري
+    if(localStorage.getItem("loggedIn") !== "true"){
+      window.location.href = "login.html";
+    }
+
+    const productSelect = document.getElementById("productSelect");
+    const quantityInput = document.getElementById("quantityInput");
+    const priceInput = document.getElementById("priceInput");
+    const saveBtn = document.getElementById("saveBtn");
+    const totalProfitEl = document.getElementById("totalProfit");
+    const totalSalesEl = document.getElementById("totalSales");
+    const totalItemsEl = document.getElementById("totalItems");
+
+    // جلب المنتجات
     let products = JSON.parse(localStorage.getItem("products")) || {};
-    let productSelect = document.getElementById("productSelect");
+    let sales = JSON.parse(localStorage.getItem("sales-" + getTodayDate())) || [];
 
-    function fillProducts() {
-      productSelect.innerHTML = '<option disabled selected>اختر</option>';
-      for (let name in products) {
-        productSelect.innerHTML += `<option value="${name}">${name}</option>`;
+    // تعبئة القائمة
+    function fillProductOptions() {
+      productSelect.innerHTML = '<option value="">-- اختر --</option>';
+      for(let name in products){
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        productSelect.appendChild(option);
       }
     }
 
-    fillProducts();
+    fillProductOptions();
 
-    function updateTotal() {
-      const product = productSelect.value;
-      const quantity = parseInt(document.getElementById("quantityInput").value);
-      if (product && quantity && products[product]) {
-        const total = products[product].price * quantity;
-        document.getElementById("totalPrice").textContent = total;
-      }
+    // تحديث الإحصائيات
+    function updateStats() {
+      let totalProfit = 0;
+      let totalSales = sales.length;
+      let totalItems = 0;
+      sales.forEach(s => {
+        totalProfit += s.profit;
+        totalItems += s.quantity;
+      });
+      totalProfitEl.textContent = totalProfit.toFixed(0);
+      totalSalesEl.textContent = totalSales;
+      totalItemsEl.textContent = totalItems;
     }
 
-    function saveSale() {
-      const product = productSelect.value;
-      const quantity = parseInt(document.getElementById("quantityInput").value);
-      if (!product || !quantity || !products[product]) {
-        alert("يرجى اختيار المنتج والعدد");
+    updateStats();
+
+    // حفظ البيع
+    saveBtn.addEventListener("click", () => {
+      const productName = productSelect.value;
+      const quantity = parseInt(quantityInput.value);
+      const price = parseFloat(priceInput.value);
+
+      if(!productName){
+        alert("يرجى اختيار المنتج");
+        return;
+      }
+      if(!quantity || quantity <= 0){
+        alert("يرجى إدخال عدد صحيح أكبر من صفر");
+        return;
+      }
+      if(!price || price <= 0){
+        alert("يرجى إدخال سعر بيع صحيح");
         return;
       }
 
-      const price = products[product].price;
-      const cost = products[product].cost;
-      const total = price * quantity;
+      const cost = products[productName]?.cost;
+      if(cost === undefined){
+        alert("هذا المنتج غير موجود");
+        return;
+      }
+
       const profit = (price - cost) * quantity;
 
-      // تحديث البيانات على الشاشة
-      document.getElementById("profit").textContent = parseInt(document.getElementById("profit").textContent) + profit;
-      document.getElementById("itemCount").textContent = parseInt(document.getElementById("itemCount").textContent) + quantity;
-      document.getElementById("totalSales").textContent = parseInt(document.getElementById("totalSales").textContent) + total;
+      const sale = {
+        product: productName,
+        quantity,
+        total: price * quantity,
+        profit,
+        time: new Date().toLocaleTimeString()
+      };
 
-      // تخزين في سجل اليوم
-      const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
-      const key = `sales-${today}`;
-      const sales = JSON.parse(localStorage.getItem(key)) || [];
-      sales.push({ product, quantity, total, profit, time: new Date().toLocaleTimeString() });
-      localStorage.setItem(key, JSON.stringify(sales));
+      sales.push(sale);
+      localStorage.setItem("sales-" + getTodayDate(), JSON.stringify(sales));
 
-      alert("✅ تم الحفظ!");
-    }
+      updateStats();
 
-    function toggleDarkMode() {
-      document.body.style.backgroundColor = document.body.style.backgroundColor === "white" ? "#111" : "white";
-      document.body.style.color = document.body.style.color === "black" ? "white" : "black";
+      // إعادة تعيين الحقول
+      productSelect.value = "";
+      quantityInput.value = 1;
+      priceInput.value = "";
+    });
+
+    // دالة للحصول على تاريخ اليوم بالشكل yyyy-mm-dd
+    function getTodayDate() {
+      const d = new Date();
+      return d.getFullYear() + "-" + 
+             String(d.getMonth()+1).padStart(2, "0") + "-" + 
+             String(d.getDate()).padStart(2, "0");
     }
   </script>
+
 </body>
 </html>
