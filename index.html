@@ -1,160 +1,208 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل المبيعات</title>
+  <title>تسجيل المبيعات اليومية</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
       background-color: #f9f9f9;
+      color: #333;
+    }
+    .dark {
+      background-color: #121212;
+      color: white;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      background: #007bff;
+      color: white;
+    }
+    .menu {
+      position: relative;
+    }
+    .menu-content {
+      position: absolute;
+      top: 2.5rem;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      display: none;
+      flex-direction: column;
+      min-width: 150px;
+      z-index: 1000;
+    }
+    .menu-content button {
+      padding: 0.5rem;
+      border: none;
+      background: white;
+      cursor: pointer;
+      text-align: right;
+    }
+    .menu-content button:hover {
+      background: #f1f1f1;
+    }
+    .container {
+      padding: 1rem;
     }
     input, select, button {
-      margin: 5px;
-      padding: 10px;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
     }
     table {
       width: 100%;
-      margin-top: 20px;
+      margin-top: 1rem;
       border-collapse: collapse;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 10px;
+      padding: 0.5rem;
       text-align: center;
-    }
-    .delete-btn {
-      background-color: red;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h2>تسجيل المبيعات</h2>
+    <div class="menu">
+      <button onclick="toggleMenu()">⋮</button>
+      <div class="menu-content" id="menuContent">
+        <button onclick="showDays()">📅 قائمة الأيام</button>
+        <button onclick="toggleDarkMode()">🌓 الوضع الليلي</button>
+        <button onclick="editPrices()">✏️ تعديل الأسعار</button>
+      </div>
+    </div>
+  </header>  <div class="container">
+    <label>الغرض:</label>
+    <select id="itemSelect"></select><label>الكمية:</label>
+<input type="number" id="qty" placeholder="الكمية" />
 
-<h2>تسجيل المبيعات اليومية</h2>
+<label>السعر الكلي:</label>
+<input type="number" id="total" placeholder="السعر الكلي" />
 
-<label>اختر الغرض:</label>
-<select id="item">
-  <option value="جرابات وسط">جرابات وسط</option>
-  <option value="جرابات ثقيل">جرابات ثقيل</option>
-  <option value="خف">خف</option>
-  <option value="بوكسر محير">بوكسر محير</option>
-  <option value="لحمي قصير">لحمي قصير</option>
-  <option value="لحمي طويل">لحمي طويل</option>
-  <option value="كشكش">كشكش</option>
-  <option value="ايميلي">ايميلي</option>
-  <option value="زنود">زنود</option>
-  <option value="شيال">شيال</option>
-  <option value="شيال رياضي">شيال رياضي</option>
-  <option value="طقم ولادي">طقم ولادي</option>
-  <option value="بوكسر رجالي">بوكسر رجالي</option>
-  <option value="بكلة فراشة">بكلة فراشة</option>
-  <option value="مطاط">مطاط</option>
-  <option value="عطر">عطر</option>
-  <option value="كولون">كولون</option>
-  <option value="عدادات">عدادات</option>
-</select>
-
-<br>
-<label>الكمية المباعة:</label>
-<input type="number" id="quantity" />
-<br>
-<label>السعر الإجمالي للبيع:</label>
-<input type="number" id="totalPrice" />
-<br>
-<button onclick="addSale()">إضافة</button>
+<button onclick="addSale()">➕ إضافة</button>
 
 <table>
   <thead>
     <tr>
-      <th>الغرض</th>
-      <th>الكمية</th>
-      <th>سعر البيع</th>
-      <th>سعر الشراء</th>
-      <th>الربح</th>
-      <th>حذف</th>
+      <th>الغرض</th><th>الكمية</th><th>المبلغ</th><th>الربح</th><th>❌</th>
     </tr>
   </thead>
-  <tbody id="salesTable"></tbody>
+  <tbody id="salesBody"></tbody>
 </table>
 
 <h3 id="summary"></h3>
 
-<script>
-  const basePrices = {
-    "جرابات وسط": 2500,
-    "جرابات ثقيل": 3000,
-    "خف": 2500,
-    "بوكسر محير": 6000,
-    "لحمي قصير": 2500,
-    "لحمي طويل": 3500,
-    "كشكش": 3000,
-    "ايميلي": 9500,
-    "زنود": 6000,
-    "شيال": 10000,
-    "شيال رياضي": 11000,
-    "طقم ولادي": 8000,
-    "بوكسر رجالي": 8300,
-    "بكلة فراشة": 5000,
-    "مطاط": 2000,
-    "عطر": 5000,
-    "كولون": 6500,
-    "عدادات": 7500
-  };
+  </div>  <script>
+    const defaultPrices = {
+      "كولون": 6500,
+      "جرابات وسط": 2500,
+      "جرابات ثقيل": 3000,
+      "خف": 2500,
+      "بوكسر محير": 6000,
+      "لحمي قصير": 2500,
+      "لحمي طويل": 3500,
+      "كشكش": 3000,
+      "ايميلي": 9500,
+      "زنود": 6000,
+      "شيال": 10000,
+      "شيال رياضي": 11000,
+      "طقم ولادي": 8000,
+      "بوكسر رجالي": 8300,
+      "بكلة فراشة": 5000,
+      "مطاط": 2000,
+      "عطر": 5000,
+      "عدادات": 7500
+    };
 
-  const sales = [];
+    let prices = JSON.parse(localStorage.getItem("prices")) || defaultPrices;
+    let sales = JSON.parse(localStorage.getItem("sales")) || {};
+    const today = new Date().toISOString().split("T")[0];
+    if (!sales[today]) sales[today] = [];
 
-  function addSale() {
-    const item = document.getElementById("item").value;
-    const quantity = parseInt(document.getElementById("quantity").value);
-    const totalPrice = parseInt(document.getElementById("totalPrice").value);
-    if (!item || !quantity || !totalPrice) {
-      alert("يرجى تعبئة جميع الحقول");
-      return;
+    function saveData() {
+      localStorage.setItem("prices", JSON.stringify(prices));
+      localStorage.setItem("sales", JSON.stringify(sales));
     }
 
-    const cost = basePrices[item] * quantity;
-    const profit = totalPrice - cost;
+    function renderSelect() {
+      const sel = document.getElementById("itemSelect");
+      sel.innerHTML = Object.keys(prices).map(k => `<option value="${k}">${k}</option>`).join("");
+    }
 
-    sales.push({ item, quantity, totalPrice, cost, profit });
+    function addSale() {
+      const item = document.getElementById("itemSelect").value;
+      const qty = parseInt(document.getElementById("qty").value);
+      const total = parseInt(document.getElementById("total").value);
+      if (!item || !qty || !total) return;
+      const cost = prices[item] * qty;
+      sales[today].push({ item, qty, total, profit: total - cost });
+      saveData();
+      renderTable();
+      document.getElementById("qty").value = "";
+      document.getElementById("total").value = "";
+    }
+
+    function renderTable() {
+      const body = document.getElementById("salesBody");
+      const data = sales[today];
+      let rows = "";
+      let total = 0, profit = 0;
+      data.forEach((s, i) => {
+        total += s.total;
+        profit += s.profit;
+        rows += `<tr><td>${s.item}</td><td>${s.qty}</td><td>${s.total}</td><td>${s.profit}</td><td><button onclick="removeSale(${i})">❌</button></td></tr>`;
+      });
+      body.innerHTML = rows;
+      document.getElementById("summary").innerText = `الإجمالي: ${total} ل.س | الربح: ${profit} ل.س`;
+    }
+
+    function removeSale(index) {
+      sales[today].splice(index, 1);
+      saveData();
+      renderTable();
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById("menuContent");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function showDays() {
+      const keys = Object.keys(sales);
+      const day = prompt("اختر يومًا:\n" + keys.join("\n"));
+      if (day && sales[day]) {
+        const newData = prompt(`تعديل بيانات يوم ${day}:\n` + JSON.stringify(sales[day], null, 2));
+        try {
+          sales[day] = JSON.parse(newData);
+          saveData();
+          if (day === today) renderTable();
+        } catch (e) { alert("خطأ بالتعديل"); }
+      }
+    }
+
+    function editPrices() {
+      const newPrices = prompt("تعديل الأسعار:\n" + JSON.stringify(prices, null, 2));
+      try {
+        prices = JSON.parse(newPrices);
+        saveData();
+        renderSelect();
+      } catch (e) {
+        alert("خطأ بالتعديل");
+      }
+    }
+
+    renderSelect();
     renderTable();
-  }
-
-  function deleteSale(index) {
-    sales.splice(index, 1);
-    renderTable();
-  }
-
-  function renderTable() {
-    const table = document.getElementById("salesTable");
-    table.innerHTML = "";
-    let totalSales = 0;
-    let totalProfit = 0;
-
-    sales.forEach((sale, index) => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${sale.item}</td>
-        <td>${sale.quantity}</td>
-        <td>${sale.totalPrice}</td>
-        <td>${sale.cost}</td>
-        <td>${sale.profit}</td>
-        <td><button class="delete-btn" onclick="deleteSale(${index})">حذف</button></td>
-      `;
-      table.appendChild(row);
-
-      totalSales += sale.totalPrice;
-      totalProfit += sale.profit;
-    });
-
-    document.getElementById("summary").textContent =
-      `إجمالي المبيع: ${totalSales} ل.س | إجمالي الربح: ${totalProfit} ل.س`;
-  }
-</script>
-
-</body>
+  </script></body>
 </html>
