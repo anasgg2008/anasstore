@@ -2,107 +2,68 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>واجهة البيع</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       background-color: #111;
       color: white;
       font-family: sans-serif;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      justify-content: flex-start;
+      direction: rtl;
     }
     h1 {
+      text-align: center;
       margin-bottom: 20px;
       font-size: 28px;
     }
     .triangle-container {
       display: flex;
-      flex-wrap: wrap;
-      width: 320px;
       justify-content: center;
-      gap: 10px;
+      gap: 20px;
       margin-bottom: 20px;
-      position: relative;
+      flex-wrap: wrap;
     }
     .box {
       background-color: #222;
-      border-radius: 15px;
-      width: 100px;
-      height: 100px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      cursor: default;
-      user-select: none;
-      box-shadow: 0 0 8px #444;
-    }
-    .box label {
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-    select, input[type=number] {
-      width: 80px;
-      padding: 5px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
+      padding: 30px;
+      border-radius: 20px;
+      width: 200px;
       text-align: center;
+      box-shadow: 0 0 15px #555;
+      font-size: 20px;
+    }
+    input[type="number"], select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
       background-color: #333;
       color: white;
-    }
-    #saveBtn {
-      background-color: red;
-      color: white;
-      border: none;
-      border-radius: 15px;
-      width: 320px;
-      height: 45px;
-      font-size: 20px;
-      cursor: pointer;
+      font-size: 18px;
+      text-align: center;
       margin-top: 10px;
-      box-shadow: 0 0 10px red;
+    }
+    button.save-btn {
+      background-color: red;
+      border: none;
+      color: white;
+      font-size: 20px;
+      padding: 12px 30px;
+      border-radius: 20px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+      box-shadow: 0 0 15px red;
       transition: background-color 0.3s;
     }
-    #saveBtn:hover {
+    button.save-btn:hover {
       background-color: #b30000;
     }
-    .stats {
-      margin-top: 20px;
-      font-size: 18px;
-      width: 320px;
+    .summary {
+      margin-top: 30px;
+      font-size: 22px;
       text-align: center;
-      background-color: #222;
-      padding: 15px;
-      border-radius: 15px;
-      box-shadow: 0 0 8px #444;
-    }
-    /* شكل المثلث */
-    .triangle-container {
-      position: relative;
-      width: 320px;
-      height: 190px;
-    }
-    .box:nth-child(1) {
-      position: absolute;
-      top: 0;
-      left: 110px;
-    }
-    .box:nth-child(2) {
-      position: absolute;
-      top: 100px;
-      left: 0;
-    }
-    .box:nth-child(3) {
-      position: absolute;
-      top: 100px;
-      left: 220px;
     }
   </style>
 </head>
@@ -111,131 +72,151 @@
   <h1>واجهة البيع</h1>
 
   <div class="triangle-container">
+
     <div class="box">
-      <label for="productSelect">اختر المنتج</label>
+      اختر المنتج
       <select id="productSelect">
-        <option value="">-- اختر --</option>
+        <option value="" disabled selected>اختر المنتج</option>
       </select>
     </div>
+
     <div class="box">
-      <label for="quantityInput">العدد</label>
+      العدد
       <input type="number" id="quantityInput" min="1" value="1" />
     </div>
+
     <div class="box">
-      <label for="priceInput">سعر البيع</label>
-      <input type="number" id="priceInput" min="1" />
+      إجمالي السعر (سعر البيع)
+      <input type="number" id="totalPriceInput" min="1" placeholder="مثلاً: 20000" />
     </div>
+
   </div>
 
-  <button id="saveBtn">احفظ</button>
+  <button class="save-btn" id="saveBtn">احفظ</button>
 
-  <div class="stats" id="stats">
-    <p>الربح الصافي: <span id="totalProfit">0</span> ل.س</p>
-    <p>عدد المبيعات: <span id="totalSales">0</span></p>
+  <div class="summary" id="summary">
+    <p>الربح الصافي: <span id="profitDisplay">0</span> ل.س</p>
     <p>عدد الأغراض: <span id="totalItems">0</span></p>
+    <p>إجمالي المبيعات: <span id="totalSales">0</span> ل.س</p>
   </div>
 
-  <script>
-    // تسجيل دخول إجباري
-    if(localStorage.getItem("loggedIn") !== "true"){
-      window.location.href = "login.html";
+<script>
+  // جلب المنتجات من localStorage (الأسعار الشراء الأساسية)
+  let products = JSON.parse(localStorage.getItem("products")) || {};
+  
+  const productSelect = document.getElementById("productSelect");
+  const quantityInput = document.getElementById("quantityInput");
+  const totalPriceInput = document.getElementById("totalPriceInput");
+  const profitDisplay = document.getElementById("profitDisplay");
+  const totalItems = document.getElementById("totalItems");
+  const totalSales = document.getElementById("totalSales");
+  const saveBtn = document.getElementById("saveBtn");
+
+  // بيانات مبيعات اليوم
+  let todaySales = JSON.parse(localStorage.getItem(getTodayKey("sales"))) || [];
+  let todayProfit = parseFloat(localStorage.getItem(getTodayKey("profit"))) || 0;
+
+  // تعمير اختيار المنتج بالاسم
+  function populateProducts() {
+    for (const name in products) {
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      productSelect.appendChild(option);
+    }
+  }
+
+  // دالة للحصول على مفتاح اليوم
+  function getTodayKey(type) {
+    const today = new Date().toISOString().slice(0,10);
+    return `${type}-${today}`;
+  }
+
+  // تحديث عرض الملخص
+  function updateSummary() {
+    let totalQuantity = todaySales.reduce((acc, item) => acc + item.quantity, 0);
+    let totalSaleValue = todaySales.reduce((acc, item) => acc + item.sellPrice, 0);
+    profitDisplay.textContent = todayProfit.toFixed(0);
+    totalItems.textContent = totalQuantity;
+    totalSales.textContent = totalSaleValue.toFixed(0);
+  }
+
+  // حساب الربح من الإدخالات الحالية
+  function calculateProfit(productName, quantity, totalSellPrice) {
+    if (!products[productName]) return 0;
+    let costPrice = products[productName].cost * quantity;
+    return totalSellPrice - costPrice;
+  }
+
+  // عند تغيير السعر أو العدد أو المنتج، نحدث الربح المعروض تلقائياً
+  function onInputChange() {
+    const prod = productSelect.value;
+    const qty = parseInt(quantityInput.value) || 0;
+    const sellPrice = parseFloat(totalPriceInput.value) || 0;
+    if (prod && qty > 0 && sellPrice > 0) {
+      let profit = calculateProfit(prod, qty, sellPrice);
+      profitDisplay.textContent = profit.toFixed(0);
+    } else {
+      profitDisplay.textContent = "0";
+    }
+  }
+
+  // حفظ البيع في اليوم الحالي
+  function saveSale() {
+    const prod = productSelect.value;
+    const qty = parseInt(quantityInput.value);
+    const sellPrice = parseFloat(totalPriceInput.value);
+    if (!prod) {
+      alert("يرجى اختيار المنتج");
+      return;
+    }
+    if (!qty || qty <= 0) {
+      alert("يرجى إدخال عدد صحيح أكبر من صفر");
+      return;
+    }
+    if (!sellPrice || sellPrice <= 0) {
+      alert("يرجى إدخال سعر بيع صحيح");
+      return;
     }
 
-    const productSelect = document.getElementById("productSelect");
-    const quantityInput = document.getElementById("quantityInput");
-    const priceInput = document.getElementById("priceInput");
-    const saveBtn = document.getElementById("saveBtn");
-    const totalProfitEl = document.getElementById("totalProfit");
-    const totalSalesEl = document.getElementById("totalSales");
-    const totalItemsEl = document.getElementById("totalItems");
+    const costPrice = products[prod].cost * qty;
+    const profit = sellPrice - costPrice;
 
-    // جلب المنتجات
-    let products = JSON.parse(localStorage.getItem("products")) || {};
-    let sales = JSON.parse(localStorage.getItem("sales-" + getTodayDate())) || [];
-
-    // تعبئة القائمة
-    function fillProductOptions() {
-      productSelect.innerHTML = '<option value="">-- اختر --</option>';
-      for(let name in products){
-        const option = document.createElement("option");
-        option.value = name;
-        option.textContent = name;
-        productSelect.appendChild(option);
-      }
-    }
-
-    fillProductOptions();
-
-    // تحديث الإحصائيات
-    function updateStats() {
-      let totalProfit = 0;
-      let totalSales = sales.length;
-      let totalItems = 0;
-      sales.forEach(s => {
-        totalProfit += s.profit;
-        totalItems += s.quantity;
-      });
-      totalProfitEl.textContent = totalProfit.toFixed(0);
-      totalSalesEl.textContent = totalSales;
-      totalItemsEl.textContent = totalItems;
-    }
-
-    updateStats();
-
-    // حفظ البيع
-    saveBtn.addEventListener("click", () => {
-      const productName = productSelect.value;
-      const quantity = parseInt(quantityInput.value);
-      const price = parseFloat(priceInput.value);
-
-      if(!productName){
-        alert("يرجى اختيار المنتج");
-        return;
-      }
-      if(!quantity || quantity <= 0){
-        alert("يرجى إدخال عدد صحيح أكبر من صفر");
-        return;
-      }
-      if(!price || price <= 0){
-        alert("يرجى إدخال سعر بيع صحيح");
-        return;
-      }
-
-      const cost = products[productName]?.cost;
-      if(cost === undefined){
-        alert("هذا المنتج غير موجود");
-        return;
-      }
-
-      const profit = (price - cost) * quantity;
-
-      const sale = {
-        product: productName,
-        quantity,
-        total: price * quantity,
-        profit,
-        time: new Date().toLocaleTimeString()
-      };
-
-      sales.push(sale);
-      localStorage.setItem("sales-" + getTodayDate(), JSON.stringify(sales));
-
-      updateStats();
-
-      // إعادة تعيين الحقول
-      productSelect.value = "";
-      quantityInput.value = 1;
-      priceInput.value = "";
+    // إضافة البيع لبيانات اليوم
+    todaySales.push({
+      product: prod,
+      quantity: qty,
+      sellPrice: sellPrice,
+      costPrice: products[prod].cost
     });
 
-    // دالة للحصول على تاريخ اليوم بالشكل yyyy-mm-dd
-    function getTodayDate() {
-      const d = new Date();
-      return d.getFullYear() + "-" + 
-             String(d.getMonth()+1).padStart(2, "0") + "-" + 
-             String(d.getDate()).padStart(2, "0");
-    }
-  </script>
+    // تحديث الربح الإجمالي لليوم
+    todayProfit += profit;
+
+    // حفظ في localStorage
+    localStorage.setItem(getTodayKey("sales"), JSON.stringify(todaySales));
+    localStorage.setItem(getTodayKey("profit"), todayProfit.toString());
+
+    updateSummary();
+
+    // مسح المدخلات بعد الحفظ
+    productSelect.value = "";
+    quantityInput.value = 1;
+    totalPriceInput.value = "";
+
+    profitDisplay.textContent = "0";
+  }
+
+  // الأحداث
+  productSelect.addEventListener("change", onInputChange);
+  quantityInput.addEventListener("input", onInputChange);
+  totalPriceInput.addEventListener("input", onInputChange);
+  saveBtn.addEventListener("click", saveSale);
+
+  // تعمير الصفحة
+  populateProducts();
+  updateSummary();
+</script>
 
 </body>
 </html>
