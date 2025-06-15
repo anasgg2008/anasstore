@@ -1,208 +1,99 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل المبيعات اليومية</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    .dark {
-      background-color: #121212;
-      color: white;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      background: #007bff;
-      color: white;
-    }
-    .menu {
-      position: relative;
-    }
-    .menu-content {
-      position: absolute;
-      top: 2.5rem;
-      right: 0;
-      background: white;
-      border: 1px solid #ccc;
-      display: none;
-      flex-direction: column;
-      min-width: 150px;
-      z-index: 1000;
-    }
-    .menu-content button {
-      padding: 0.5rem;
-      border: none;
-      background: white;
-      cursor: pointer;
-      text-align: right;
-    }
-    .menu-content button:hover {
-      background: #f1f1f1;
-    }
-    .container {
-      padding: 1rem;
-    }
-    input, select, button {
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      width: 100%;
-    }
-    table {
-      width: 100%;
-      margin-top: 1rem;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.5rem;
-      text-align: center;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>تعديل الأسعار</title>
+<style>
+  body { font-family: sans-serif; direction: rtl; padding: 20px; }
+  input, button { padding: 8px; margin: 5px 0; width: 100%; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+  th { background-color: #f2f2f2; }
+</style>
 </head>
 <body>
-  <header>
-    <h2>تسجيل المبيعات</h2>
-    <div class="menu">
-      <button onclick="toggleMenu()">⋮</button>
-      <div class="menu-content" id="menuContent">
-        <button onclick="showDays()">📅 قائمة الأيام</button>
-        <button onclick="toggleDarkMode()">🌓 الوضع الليلي</button>
-        <button onclick="editPrices()">✏️ تعديل الأسعار</button>
-      </div>
-    </div>
-  </header>  <div class="container">
-    <label>الغرض:</label>
-    <select id="itemSelect"></select><label>الكمية:</label>
-<input type="number" id="qty" placeholder="الكمية" />
 
-<label>السعر الكلي:</label>
-<input type="number" id="total" placeholder="السعر الكلي" />
+<h2>تعديل الأسعار</h2>
 
-<button onclick="addSale()">➕ إضافة</button>
+<label>اسم الغرض:</label>
+<input type="text" id="itemName" placeholder="مثلاً: كولون" />
+
+<label>سعر الشراء:</label>
+<input type="number" id="purchasePrice" placeholder="مثلاً: 6500" />
+
+<label>سعر البيع:</label>
+<input type="number" id="salePrice" placeholder="مثلاً: 10999" />
+
+<button onclick="addOrUpdateItem()">إضافة أو تعديل الغرض</button>
+
+<div id="message" style="color:red; margin-top:10px;"></div>
 
 <table>
-  <thead>
-    <tr>
-      <th>الغرض</th><th>الكمية</th><th>المبلغ</th><th>الربح</th><th>❌</th>
-    </tr>
-  </thead>
-  <tbody id="salesBody"></tbody>
+<thead>
+<tr><th>اسم الغرض</th><th>سعر الشراء</th><th>سعر البيع</th><th>حذف</th></tr>
+</thead>
+<tbody id="itemsTable"></tbody>
 </table>
 
-<h3 id="summary"></h3>
+<script>
+  // استدعاء البيانات من التخزين المحلي أو تعيين القيمة الافتراضية
+  let items = JSON.parse(localStorage.getItem('itemsPrices')) || {};
 
-  </div>  <script>
-    const defaultPrices = {
-      "كولون": 6500,
-      "جرابات وسط": 2500,
-      "جرابات ثقيل": 3000,
-      "خف": 2500,
-      "بوكسر محير": 6000,
-      "لحمي قصير": 2500,
-      "لحمي طويل": 3500,
-      "كشكش": 3000,
-      "ايميلي": 9500,
-      "زنود": 6000,
-      "شيال": 10000,
-      "شيال رياضي": 11000,
-      "طقم ولادي": 8000,
-      "بوكسر رجالي": 8300,
-      "بكلة فراشة": 5000,
-      "مطاط": 2000,
-      "عطر": 5000,
-      "عدادات": 7500
-    };
+  const messageEl = document.getElementById('message');
+  const tableBody = document.getElementById('itemsTable');
 
-    let prices = JSON.parse(localStorage.getItem("prices")) || defaultPrices;
-    let sales = JSON.parse(localStorage.getItem("sales")) || {};
-    const today = new Date().toISOString().split("T")[0];
-    if (!sales[today]) sales[today] = [];
+  function renderTable() {
+    tableBody.innerHTML = '';
+    for (const name in items) {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${name}</td>
+        <td>${items[name].purchase}</td>
+        <td>${items[name].sale}</td>
+        <td><button onclick="deleteItem('${name}')">حذف</button></td>
+      `;
+      tableBody.appendChild(row);
+    }
+  }
 
-    function saveData() {
-      localStorage.setItem("prices", JSON.stringify(prices));
-      localStorage.setItem("sales", JSON.stringify(sales));
+  function addOrUpdateItem() {
+    const name = document.getElementById('itemName').value.trim();
+    const purchase = Number(document.getElementById('purchasePrice').value);
+    const sale = Number(document.getElementById('salePrice').value);
+
+    if (!name) {
+      messageEl.textContent = 'يجب إدخال اسم الغرض';
+      return;
+    }
+    if (isNaN(purchase) || isNaN(sale) || purchase <= 0 || sale <= 0) {
+      messageEl.textContent = 'يرجى إدخال أسعار صحيحة أكبر من صفر';
+      return;
     }
 
-    function renderSelect() {
-      const sel = document.getElementById("itemSelect");
-      sel.innerHTML = Object.keys(prices).map(k => `<option value="${k}">${k}</option>`).join("");
-    }
+    items[name] = { purchase, sale };
+    localStorage.setItem('itemsPrices', JSON.stringify(items));
 
-    function addSale() {
-      const item = document.getElementById("itemSelect").value;
-      const qty = parseInt(document.getElementById("qty").value);
-      const total = parseInt(document.getElementById("total").value);
-      if (!item || !qty || !total) return;
-      const cost = prices[item] * qty;
-      sales[today].push({ item, qty, total, profit: total - cost });
-      saveData();
-      renderTable();
-      document.getElementById("qty").value = "";
-      document.getElementById("total").value = "";
-    }
+    messageEl.style.color = 'green';
+    messageEl.textContent = `تمت إضافة/تعديل الغرض "${name}" بنجاح`;
 
-    function renderTable() {
-      const body = document.getElementById("salesBody");
-      const data = sales[today];
-      let rows = "";
-      let total = 0, profit = 0;
-      data.forEach((s, i) => {
-        total += s.total;
-        profit += s.profit;
-        rows += `<tr><td>${s.item}</td><td>${s.qty}</td><td>${s.total}</td><td>${s.profit}</td><td><button onclick="removeSale(${i})">❌</button></td></tr>`;
-      });
-      body.innerHTML = rows;
-      document.getElementById("summary").innerText = `الإجمالي: ${total} ل.س | الربح: ${profit} ل.س`;
-    }
+    document.getElementById('itemName').value = '';
+    document.getElementById('purchasePrice').value = '';
+    document.getElementById('salePrice').value = '';
 
-    function removeSale(index) {
-      sales[today].splice(index, 1);
-      saveData();
-      renderTable();
-    }
-
-    function toggleMenu() {
-      const menu = document.getElementById("menuContent");
-      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
-    }
-
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark");
-    }
-
-    function showDays() {
-      const keys = Object.keys(sales);
-      const day = prompt("اختر يومًا:\n" + keys.join("\n"));
-      if (day && sales[day]) {
-        const newData = prompt(`تعديل بيانات يوم ${day}:\n` + JSON.stringify(sales[day], null, 2));
-        try {
-          sales[day] = JSON.parse(newData);
-          saveData();
-          if (day === today) renderTable();
-        } catch (e) { alert("خطأ بالتعديل"); }
-      }
-    }
-
-    function editPrices() {
-      const newPrices = prompt("تعديل الأسعار:\n" + JSON.stringify(prices, null, 2));
-      try {
-        prices = JSON.parse(newPrices);
-        saveData();
-        renderSelect();
-      } catch (e) {
-        alert("خطأ بالتعديل");
-      }
-    }
-
-    renderSelect();
     renderTable();
-  </script></body>
+  }
+
+  function deleteItem(name) {
+    delete items[name];
+    localStorage.setItem('itemsPrices', JSON.stringify(items));
+    renderTable();
+    messageEl.textContent = `تم حذف الغرض "${name}"`;
+  }
+
+  // عند تحميل الصفحة، عرض الجدول
+  renderTable();
+</script>
+
+</body>
 </html>
