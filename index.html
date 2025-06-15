@@ -1,252 +1,160 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>تسجيل المبيعات وتعديل الأسعار</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>واجهة البيع</title>
+  <style>
     body {
-        font-family: Arial, sans-serif;
-        background-color: #fafafa;
-        margin: 20px;
-        color: #222;
+      font-family: sans-serif;
+      background-color: #111;
+      color: white;
+      padding: 20px;
+      text-align: center;
     }
-    h2 {
-        margin-top: 40px;
-        border-bottom: 2px solid #4CAF50;
-        padding-bottom: 5px;
+    .triangle-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
     }
-    .container {
-        max-width: 700px;
-        margin: auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
     }
-    label {
-        display: block;
-        margin: 15px 0 5px;
+    .box {
+      background-color: #222;
+      padding: 20px;
+      border-radius: 15px;
+      width: 200px;
+      font-size: 18px;
     }
-    select, input[type=number], input[type=text] {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-sizing: border-box;
+    select, input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
     }
     button {
-        margin-top: 15px;
-        padding: 12px 20px;
-        font-size: 16px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
+      padding: 10px 30px;
+      font-size: 18px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
     }
-    button:hover {
-        background-color: #45a049;
+    .results {
+      margin-top: 20px;
+      font-size: 18px;
     }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 25px;
+    .menu {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: flex;
+      gap: 10px;
     }
-    th, td {
-        padding: 10px;
-        border: 1px solid #ddd;
-        text-align: center;
+    .menu button {
+      padding: 5px 10px;
+      font-size: 14px;
     }
-    .flex-row {
-        display: flex;
-        gap: 15px;
-    }
-    .flex-child {
-        flex: 1;
-    }
-    .error {
-        color: red;
-        margin-top: 10px;
-    }
-</style>
+  </style>
 </head>
 <body>
+  <div class="menu">
+    <button onclick="window.location.href='products.html'">➕ إضافة منتج</button>
+    <button onclick="window.location.href='sales.html'">📅 سجل المبيعات</button>
+    <button onclick="toggleDarkMode()">🌓 وضع داكن</button>
+  </div>
 
-<div class="container">
+  <h1>واجهة البيع</h1>
 
-    <h2>تعديل أسعار وإضافة أغراض جديدة</h2>
-    <label for="productNameInput">اسم المنتج:</label>
-    <input type="text" id="productNameInput" placeholder="مثلاً: جرابات رجالي" />
-
-    <label for="productPriceInput">السعر الأساسي (للوحدة):</label>
-    <input type="number" id="productPriceInput" placeholder="مثلاً: 6000" min="1" />
-
-    <button onclick="addOrUpdateProduct()">أضف أو عدل المنتج</button>
-    <div id="productMsg" class="error"></div>
-
-    <h2>تسجيل مبيعات اليوم</h2>
-    <label for="productSelect">اختر المنتج:</label>
-    <select id="productSelect">
-        <!-- المنتجات تتحمل ديناميكياً -->
-    </select>
-
-    <div class="flex-row">
-        <div class="flex-child">
-            <label for="quantityInput">عدد القطع:</label>
-            <input type="number" id="quantityInput" min="1" placeholder="مثلاً: 3" />
-        </div>
-        <div class="flex-child">
-            <label for="totalPriceInput">السعر الإجمالي (البيع):</label>
-            <input type="number" id="totalPriceInput" min="1" placeholder="مثلاً: 18000" />
-        </div>
+  <div class="triangle-grid">
+    <div class="row">
+      <div class="box">
+        اختر المنتج
+        <select id="productSelect" onchange="updateTotal()">
+          <option disabled selected>اختر</option>
+        </select>
+      </div>
     </div>
+    <div class="row">
+      <div class="box">
+        العدد
+        <input type="number" id="quantityInput" value="1" min="1" oninput="updateTotal()" />
+      </div>
+      <div class="box">
+        إجمالي السعر
+        <div id="totalPrice">0</div>
+      </div>
+    </div>
+  </div>
 
-    <button onclick="addSale()">أضف المبيع</button>
-    <div id="saleMsg" class="error"></div>
+  <button onclick="saveSale()">💾 احفظ</button>
 
-    <h2>سجل المبيعات</h2>
-    <table id="salesTable">
-        <thead>
-            <tr>
-                <th>المنتج</th>
-                <th>عدد القطع</th>
-                <th>السعر الإجمالي</th>
-                <th>الربح</th>
-                <th>التاريخ</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- سجل المبيعات يظهر هنا -->
-        </tbody>
-    </table>
+  <div class="results">
+    <div>الربح الصافي: <span id="profit">0</span> ل.س</div>
+    <div>عدد الأغراض: <span id="itemCount">0</span></div>
+    <div>إجمالي المبيعات: <span id="totalSales">0</span> ل.س</div>
+  </div>
 
-    <button onclick="clearSales()" style="margin-top:20px; background:#d9534f;">حذف كل المبيعات</button>
-</div>
+  <script>
+    let products = JSON.parse(localStorage.getItem("products")) || {};
+    let productSelect = document.getElementById("productSelect");
 
-<script>
-    // جلب بيانات المنتجات من localStorage أو إستخدام البيانات الافتراضية
-    let products = JSON.parse(localStorage.getItem('products')) || {
-        "كولون": 6500,
-        "جرابات وسط": 2500,
-        "جرابات ثقيل": 3000,
-        "خف": 2500,
-        "بوكسر محير": 6000,
-        "لحمي قصير": 2500,
-        "لحمي طويل": 3500,
-        "كشكش": 3000,
-        "ايميلي": 9500,
-        "زنود": 6000,
-        "شيال": 10000,
-        "شيال رياضي": 11000,
-        "طقم ولادي": 8000,
-        "بوكسر رجالي": 8300,
-        "بكلة فراشة": 5000,
-        "مطاط": 2000,
-        "عطر": 5000
-    };
-
-    // جلب بيانات المبيعات
-    let sales = JSON.parse(localStorage.getItem('sales')) || [];
-
-    // تحديث قائمة المنتجات في select
-    function updateProductSelect() {
-        const select = document.getElementById('productSelect');
-        select.innerHTML = '';
-        for (const [name, price] of Object.entries(products)) {
-            let option = document.createElement('option');
-            option.value = name;
-            option.textContent = `${name} - السعر الأساسي: ${price}`;
-            select.appendChild(option);
-        }
+    function fillProducts() {
+      productSelect.innerHTML = '<option disabled selected>اختر</option>';
+      for (let name in products) {
+        productSelect.innerHTML += `<option value="${name}">${name}</option>`;
+      }
     }
 
-    // إضافة أو تعديل منتج
-    function addOrUpdateProduct() {
-        const nameInput = document.getElementById('productNameInput');
-        const priceInput = document.getElementById('productPriceInput');
-        const msg = document.getElementById('productMsg');
+    fillProducts();
 
-        const name = nameInput.value.trim();
-        const price = Number(priceInput.value);
-
-        if (!name) {
-            msg.textContent = 'يرجى إدخال اسم المنتج';
-            return;
-        }
-        if (!price || price <= 0) {
-            msg.textContent = 'يرجى إدخال سعر صحيح أكبر من صفر';
-            return;
-        }
-
-        products[name] = price; // أضف أو عدل المنتج
-        localStorage.setItem('products', JSON.stringify(products));
-        msg.textContent = 'تمت الإضافة/التعديل بنجاح!';
-        nameInput.value = '';
-        priceInput.value = '';
-
-        updateProductSelect();
+    function updateTotal() {
+      const product = productSelect.value;
+      const quantity = parseInt(document.getElementById("quantityInput").value);
+      if (product && quantity && products[product]) {
+        const total = products[product].price * quantity;
+        document.getElementById("totalPrice").textContent = total;
+      }
     }
 
-    // إضافة مبيع
-    function addSale() {
-        const saleMsg = document.getElementById('saleMsg');
-        saleMsg.textContent = '';
+    function saveSale() {
+      const product = productSelect.value;
+      const quantity = parseInt(document.getElementById("quantityInput").value);
+      if (!product || !quantity || !products[product]) {
+        alert("يرجى اختيار المنتج والعدد");
+        return;
+      }
 
-        const product = document.getElementById('productSelect').value;
-        const quantity = Number(document.getElementById('quantityInput').value);
-        const totalPrice = Number(document.getElementById('totalPriceInput').value);
+      const price = products[product].price;
+      const cost = products[product].cost;
+      const total = price * quantity;
+      const profit = (price - cost) * quantity;
 
-        if (!product) {
-            saleMsg.textContent = 'اختر المنتج من القائمة';
-            return;
-        }
-        if (!quantity || quantity <= 0) {
-            saleMsg.textContent = 'أدخل عدد قطع صحيح أكبر من صفر';
-            return;
-        }
-        if (!totalPrice || totalPrice <= 0) {
-            saleMsg.textContent = 'أدخل سعر بيع إجمالي صحيح';
-            return;
-        }
+      // تحديث البيانات على الشاشة
+      document.getElementById("profit").textContent = parseInt(document.getElementById("profit").textContent) + profit;
+      document.getElementById("itemCount").textContent = parseInt(document.getElementById("itemCount").textContent) + quantity;
+      document.getElementById("totalSales").textContent = parseInt(document.getElementById("totalSales").textContent) + total;
 
-        // حساب الربح
-        const costPrice = products[product];
-        const profit = totalPrice - (costPrice * quantity);
+      // تخزين في سجل اليوم
+      const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+      const key = `sales-${today}`;
+      const sales = JSON.parse(localStorage.getItem(key)) || [];
+      sales.push({ product, quantity, total, profit, time: new Date().toLocaleTimeString() });
+      localStorage.setItem(key, JSON.stringify(sales));
 
-        // تخزين المبيع
-        sales.push({
-            product,
-            quantity,
-            totalPrice,
-            profit,
-            date: new Date().toLocaleDateString()
-        });
-        localStorage.setItem('sales', JSON.stringify(sales));
-
-        displaySales();
-
-        // إعادة تعيين الحقول
-        document.getElementById('quantityInput').value = '';
-        document.getElementById('totalPriceInput').value = '';
+      alert("✅ تم الحفظ!");
     }
 
-    // عرض المبيعات في الجدول
-    function displaySales() {
-        const tbody = document.querySelector('#salesTable tbody');
-        tbody.innerHTML = '';
-        sales.forEach(sale => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${sale.product}</td>
-                <td>${sale.quantity}</td>
-                <td>${sale.totalPrice}</td>
-                <td>${sale.profit}</td>
-                <td>${sale.date}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+    function toggleDarkMode() {
+      document.body.style.backgroundColor = document.body.style.backgroundColor === "white" ? "#111" : "white";
+      document.body.style.color = document.body.style.color === "black" ? "white" : "black";
     }
-
-    // حذف
+  </script>
+</body>
+</html>
