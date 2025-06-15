@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>سجل المبيعات اليومية</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .day {
+      border: 1px solid #444;
+      border-radius: 10px;
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #222;
+    }
+    .day h3 {
+      margin: 0 0 10px 0;
+    }
+    pre {
+      background-color: #333;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <h1>📅 سجل المبيعات اليومية</h1>
+  <div id="sales"></div>
+
+  <script>
+    const salesDiv = document.getElementById("sales");
+
+    // نقرأ كل المفاتيح في localStorage اللي بتبدأ بـ sales-
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("sales-")) {
+        const day = key.replace("sales-", "");
+        const data = JSON.parse(localStorage.getItem(key));
+
+        const container = document.createElement("div");
+        container.className = "day";
+
+        let text = "";
+        data.forEach(item => {
+          text += `المنتج: ${item.product}\nالكمية: ${item.quantity}\nإجمالي السعر: ${item.total} ل.س\nالربح: ${item.profit} ل.س\nالوقت: ${item.time}\n\n`;
+        });
+
+        container.innerHTML = `<h3>📆 ${day}</h3><pre>${text}</pre>`;
+        salesDiv.appendChild(container);
+      }
+    }
+  </script>
+</body>
+</html>
