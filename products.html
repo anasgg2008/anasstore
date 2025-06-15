@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>إضافة وتعديل المنتجات</title>
   <style>
     body {
@@ -10,155 +10,187 @@
       color: white;
       font-family: sans-serif;
       padding: 20px;
+      min-height: 100vh;
+      direction: rtl;
     }
-    input, button {
-      padding: 10px;
-      font-size: 18px;
-      margin: 10px 0;
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+      background-color: #222;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #444;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"] {
       width: 100%;
-      box-sizing: border-box;
+      padding: 8px;
+      margin-bottom: 15px;
       border-radius: 8px;
       border: none;
+      background-color: #333;
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
     }
     button {
-      background-color: #e74c3c;
+      background-color: red;
+      border: none;
       color: white;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 15px;
       cursor: pointer;
+      width: 100%;
+      box-shadow: 0 0 10px red;
+      transition: background-color 0.3s;
     }
-    .product-list {
+    button:hover {
+      background-color: #b30000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 30px;
-    }
-    .product-item {
-      border: 1px solid #444;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .product-item input {
-      width: 25%;
-      font-size: 16px;
-      padding: 5px;
-      border-radius: 6px;
-      border: none;
       background-color: #222;
-      color: white;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
       text-align: center;
-    }
-    .actions button {
-      margin-left: 10px;
-      padding: 6px 12px;
+      border-bottom: 1px solid #444;
       font-size: 16px;
-      border-radius: 6px;
+    }
+    th {
+      background-color: #333;
+    }
+    tr:hover {
+      background-color: #333;
+    }
+    .delete-btn {
+      background-color: #800000;
       border: none;
-    }
-    .actions button.save {
-      background-color: #27ae60;
       color: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
     }
-    .actions button.delete {
-      background-color: #c0392b;
-      color: white;
+    .delete-btn:hover {
+      background-color: #b30000;
     }
   </style>
 </head>
 <body>
-  <h1>إضافة منتج جديد</h1>
-  <input type="text" id="name" placeholder="اسم المنتج" />
-  <input type="number" id="price" placeholder="سعر البيع" />
-  <input type="number" id="cost" placeholder="سعر الشراء" />
-  <button onclick="addProduct()">➕ إضافة</button>
 
-  <h2>المنتجات الحالية</h2>
-  <div class="product-list" id="productList"></div>
+  <h1>إضافة وتعديل المنتجات</h1>
+
+  <form id="productForm">
+    <label for="productName">اسم المنتج</label>
+    <input type="text" id="productName" placeholder="مثلاً: جرابات" required />
+
+    <label for="productCost">سعر الشراء الأساسي (ل.س)</label>
+    <input type="number" id="productCost" min="1" placeholder="مثلاً: 1000" required />
+
+    <button type="submit">أضف / حدّث المنتج</button>
+  </form>
+
+  <table id="productsTable">
+    <thead>
+      <tr>
+        <th>اسم المنتج</th>
+        <th>سعر الشراء الأساسي</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- المنتجات تظهر هنا -->
+    </tbody>
+  </table>
 
   <script>
+    const productForm = document.getElementById("productForm");
+    const productNameInput = document.getElementById("productName");
+    const productCostInput = document.getElementById("productCost");
+    const productsTableBody = document.querySelector("#productsTable tbody");
+
+    // جلب المنتجات من localStorage أو إنشاء جديد
     let products = JSON.parse(localStorage.getItem("products")) || {};
 
+    // تحديث جدول عرض المنتجات
+    function updateTable() {
+      productsTableBody.innerHTML = "";
+      for (let name in products) {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = name;
+        tr.appendChild(tdName);
+
+        const tdCost = document.createElement("td");
+        tdCost.textContent = products[name].cost;
+        tr.appendChild(tdCost);
+
+        const tdDelete = document.createElement("td");
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "حذف";
+        btnDelete.className = "delete-btn";
+        btnDelete.onclick = () => {
+          if(confirm(`هل تريد حذف المنتج "${name}"؟`)){
+            delete products[name];
+            saveProducts();
+            updateTable();
+          }
+        };
+        tdDelete.appendChild(btnDelete);
+        tr.appendChild(tdDelete);
+
+        productsTableBody.appendChild(tr);
+      }
+    }
+
+    // حفظ المنتجات في localStorage
     function saveProducts() {
       localStorage.setItem("products", JSON.stringify(products));
-      renderProducts();
     }
 
-    function addProduct() {
-      const name = document.getElementById("name").value.trim();
-      const price = parseInt(document.getElementById("price").value);
-      const cost = parseInt(document.getElementById("cost").value);
-      if (!name || !price || !cost) {
-        alert("يرجى إدخال كل البيانات");
+    // التعامل مع إضافة / تعديل منتج جديد
+    productForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = productNameInput.value.trim();
+      const cost = parseFloat(productCostInput.value);
+
+      if (!name) {
+        alert("يرجى إدخال اسم المنتج");
         return;
       }
-      products[name] = { price, cost };
-      saveProducts();
-      document.getElementById("name").value = "";
-      document.getElementById("price").value = "";
-      document.getElementById("cost").value = "";
-    }
-
-    function deleteProduct(name) {
-      if(confirm(`هل أنت متأكد من حذف المنتج "${name}"؟`)){
-        delete products[name];
-        saveProducts();
-      }
-    }
-
-    function updateProduct(name, priceInput, costInput) {
-      const price = parseInt(priceInput.value);
-      const cost = parseInt(costInput.value);
-      if (!price || !cost) {
-        alert("يرجى إدخال قيم صحيحة");
+      if (!cost || cost <= 0) {
+        alert("يرجى إدخال سعر شراء صحيح أكبر من صفر");
         return;
       }
-      products[name] = { price, cost };
+
+      products[name] = { cost };
       saveProducts();
-    }
+      updateTable();
 
-    function renderProducts() {
-      const list = document.getElementById("productList");
-      list.innerHTML = "";
-      for (let name in products) {
-        const item = document.createElement("div");
-        item.className = "product-item";
+      productForm.reset();
+    });
 
-        const nameSpan = document.createElement("strong");
-        nameSpan.textContent = name;
-
-        const priceInput = document.createElement("input");
-        priceInput.type = "number";
-        priceInput.value = products[name].price;
-
-        const costInput = document.createElement("input");
-        costInput.type = "number";
-        costInput.value = products[name].cost;
-
-        const actions = document.createElement("div");
-        actions.className = "actions";
-
-        const saveBtn = document.createElement("button");
-        saveBtn.textContent = "💾 حفظ";
-        saveBtn.className = "save";
-        saveBtn.onclick = () => updateProduct(name, priceInput, costInput);
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "🗑 حذف";
-        deleteBtn.className = "delete";
-        deleteBtn.onclick = () => deleteProduct(name);
-
-        actions.appendChild(saveBtn);
-        actions.appendChild(deleteBtn);
-
-        item.appendChild(nameSpan);
-        item.appendChild(priceInput);
-        item.appendChild(costInput);
-        item.appendChild(actions);
-
-        list.appendChild(item);
-      }
-    }
-
-    renderProducts();
+    updateTable();
   </script>
+
 </body>
 </html>
