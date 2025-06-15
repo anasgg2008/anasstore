@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تسجيل المبيعات اليومية</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f9f9f9; padding: 20px; }
+    input, button { margin: 5px; padding: 8px; }
+    .summary { margin-top: 20px; padding: 10px; background: #e0ffe0; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>إدخال منتج</h2>
+  <input type="text" id="name" placeholder="اسم المنتج">
+  <input type="number" id="qty" placeholder="الكمية">
+  <input type="number" id="price" placeholder="سعر البيع">
+  <input type="number" id="cost" placeholder="سعر الشراء">
+  <button onclick="addProduct()">إضافة</button>
+
+  <div class="summary" id="summary">
+    <p>عدد الأصناف: 0</p>
+    <p>إجمالي المبيعات: 0 ل.س</p>
+    <p>إجمالي الربح: 0 ل.س</p>
+  </div>
+
+  <script>
+    let data = [];
+    function addProduct() {
+      const name = document.getElementById("name").value;
+      const qty = +document.getElementById("qty").value;
+      const price = +document.getElementById("price").value;
+      const cost = +document.getElementById("cost").value;
+      if (!name || qty <= 0 || price <= 0 || cost < 0) return alert("يرجى تعبئة كل الحقول بشكل صحيح");
+
+      const totalSale = qty * price;
+      const totalProfit = qty * (price - cost);
+      data.push({ name, qty, price, cost, totalSale, totalProfit });
+      updateSummary();
+      document.getElementById("name").value = '';
+      document.getElementById("qty").value = '';
+      document.getElementById("price").value = '';
+      document.getElementById("cost").value = '';
+    }
+
+    function updateSummary() {
+      const totalItems = data.length;
+      const totalSales = data.reduce((sum, item) => sum + item.totalSale, 0);
+      const totalProfit = data.reduce((sum, item) => sum + item.totalProfit, 0);
+      document.getElementById("summary").innerHTML =
+        `<p>عدد الأصناف: ${totalItems}</p>
+         <p>إجمالي المبيعات: ${totalSales.toLocaleString()} ل.س</p>
+         <p>إجمالي الربح: ${totalProfit.toLocaleString()} ل.س</p>`;
+    }
+  </script>
+</body>
+</html>
