@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إضافة وتعديل المنتجات</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 18px;
+      margin: 10px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background-color: #e74c3c;
+      color: white;
+      cursor: pointer;
+    }
+    .product-list {
+      margin-top: 30px;
+    }
+    .product-item {
+      border: 1px solid #444;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .product-item input {
+      width: 25%;
+      font-size: 16px;
+      padding: 5px;
+      border-radius: 6px;
+      border: none;
+      background-color: #222;
+      color: white;
+      text-align: center;
+    }
+    .actions button {
+      margin-left: 10px;
+      padding: 6px 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    .actions button.save {
+      background-color: #27ae60;
+      color: white;
+    }
+    .actions button.delete {
+      background-color: #c0392b;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>إضافة منتج جديد</h1>
+  <input type="text" id="name" placeholder="اسم المنتج" />
+  <input type="number" id="price" placeholder="سعر البيع" />
+  <input type="number" id="cost" placeholder="سعر الشراء" />
+  <button onclick="addProduct()">➕ إضافة</button>
+
+  <h2>المنتجات الحالية</h2>
+  <div class="product-list" id="productList"></div>
+
+  <script>
+    let products = JSON.parse(localStorage.getItem("products")) || {};
+
+    function saveProducts() {
+      localStorage.setItem("products", JSON.stringify(products));
+      renderProducts();
+    }
+
+    function addProduct() {
+      const name = document.getElementById("name").value.trim();
+      const price = parseInt(document.getElementById("price").value);
+      const cost = parseInt(document.getElementById("cost").value);
+      if (!name || !price || !cost) {
+        alert("يرجى إدخال كل البيانات");
+        return;
+      }
+      products[name] = { price, cost };
+      saveProducts();
+      document.getElementById("name").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("cost").value = "";
+    }
+
+    function deleteProduct(name) {
+      if(confirm(`هل أنت متأكد من حذف المنتج "${name}"؟`)){
+        delete products[name];
+        saveProducts();
+      }
+    }
+
+    function updateProduct(name, priceInput, costInput) {
+      const price = parseInt(priceInput.value);
+      const cost = parseInt(costInput.value);
+      if (!price || !cost) {
+        alert("يرجى إدخال قيم صحيحة");
+        return;
+      }
+      products[name] = { price, cost };
+      saveProducts();
+    }
+
+    function renderProducts() {
+      const list = document.getElementById("productList");
+      list.innerHTML = "";
+      for (let name in products) {
+        const item = document.createElement("div");
+        item.className = "product-item";
+
+        const nameSpan = document.createElement("strong");
+        nameSpan.textContent = name;
+
+        const priceInput = document.createElement("input");
+        priceInput.type = "number";
+        priceInput.value = products[name].price;
+
+        const costInput = document.createElement("input");
+        costInput.type = "number";
+        costInput.value = products[name].cost;
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const saveBtn = document.createElement("button");
+        saveBtn.textContent = "💾 حفظ";
+        saveBtn.className = "save";
+        saveBtn.onclick = () => updateProduct(name, priceInput, costInput);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "🗑 حذف";
+        deleteBtn.className = "delete";
+        deleteBtn.onclick = () => deleteProduct(name);
+
+        actions.appendChild(saveBtn);
+        actions.appendChild(deleteBtn);
+
+        item.appendChild(nameSpan);
+        item.appendChild(priceInput);
+        item.appendChild(costInput);
+        item.appendChild(actions);
+
+        list.appendChild(item);
+      }
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
