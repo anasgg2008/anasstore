@@ -3,258 +3,250 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>تسجيل المبيعات اليومية مع تعديل الأسعار</title>
+<title>تسجيل المبيعات وتعديل الأسعار</title>
 <style>
-  body { font-family: sans-serif; padding: 20px; background:#f0f0f0; }
-  label, select, input, button { display: block; margin: 8px 0; width: 100%; font-size: 18px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
-  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-  th { background: #ddd; }
-  #menu { margin-bottom: 20px; }
-  #menu button { margin-right: 5px; }
-  #priceEditor { background: #fff; padding: 10px; margin-top: 20px; display: none; }
-  .error { color: red; }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fafafa;
+        margin: 20px;
+        color: #222;
+    }
+    h2 {
+        margin-top: 40px;
+        border-bottom: 2px solid #4CAF50;
+        padding-bottom: 5px;
+    }
+    .container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    label {
+        display: block;
+        margin: 15px 0 5px;
+    }
+    select, input[type=number], input[type=text] {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    button {
+        margin-top: 15px;
+        padding: 12px 20px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #45a049;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 25px;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    .flex-row {
+        display: flex;
+        gap: 15px;
+    }
+    .flex-child {
+        flex: 1;
+    }
+    .error {
+        color: red;
+        margin-top: 10px;
+    }
 </style>
 </head>
 <body>
 
-<h1>تسجيل المبيعات اليومية</h1>
+<div class="container">
 
-<div id="menu">
-  <button onclick="togglePriceEditor()">تعديل الأسعار والأغراض</button>
-  <button onclick="showPreviousDays()">عرض الأيام السابقة</button>
-  <button onclick="clearTodaySales()">مسح مبيعات اليوم</button>
-</div>
+    <h2>تعديل أسعار وإضافة أغراض جديدة</h2>
+    <label for="productNameInput">اسم المنتج:</label>
+    <input type="text" id="productNameInput" placeholder="مثلاً: جرابات رجالي" />
 
-<!-- إدخال مبيع -->
-<label for="productSelect">اختر المنتج:</label>
-<select id="productSelect"></select>
+    <label for="productPriceInput">السعر الأساسي (للوحدة):</label>
+    <input type="number" id="productPriceInput" placeholder="مثلاً: 6000" min="1" />
 
-<label for="quantityInput">كمية البيع (عدد القطع):</label>
-<input type="number" id="quantityInput" min="1" value="1" />
+    <button onclick="addOrUpdateProduct()">أضف أو عدل المنتج</button>
+    <div id="productMsg" class="error"></div>
 
-<label for="totalPriceInput">السعر الكلي للقطع المباعة:</label>
-<input type="number" id="totalPriceInput" min="1" value="0" />
+    <h2>تسجيل مبيعات اليوم</h2>
+    <label for="productSelect">اختر المنتج:</label>
+    <select id="productSelect">
+        <!-- المنتجات تتحمل ديناميكياً -->
+    </select>
 
-<button onclick="addSale()">حفظ البيع</button>
+    <div class="flex-row">
+        <div class="flex-child">
+            <label for="quantityInput">عدد القطع:</label>
+            <input type="number" id="quantityInput" min="1" placeholder="مثلاً: 3" />
+        </div>
+        <div class="flex-child">
+            <label for="totalPriceInput">السعر الإجمالي (البيع):</label>
+            <input type="number" id="totalPriceInput" min="1" placeholder="مثلاً: 18000" />
+        </div>
+    </div>
 
-<!-- جدول المبيعات -->
-<h2>مبيعات اليوم</h2>
-<table>
-  <thead>
-    <tr>
-      <th>المنتج</th>
-      <th>الكمية</th>
-      <th>السعر الكلي</th>
-      <th>الربح</th>
-      <th>تحرير</th>
-    </tr>
-  </thead>
-  <tbody id="salesTableBody"></tbody>
-</table>
+    <button onclick="addSale()">أضف المبيع</button>
+    <div id="saleMsg" class="error"></div>
 
-<h3>الإجماليات</h3>
-<p>إجمالي المبيع: <span id="totalSales">0</span> ل.س</p>
-<p>إجمالي الربح: <span id="totalProfit">0</span> ل.س</p>
+    <h2>سجل المبيعات</h2>
+    <table id="salesTable">
+        <thead>
+            <tr>
+                <th>المنتج</th>
+                <th>عدد القطع</th>
+                <th>السعر الإجمالي</th>
+                <th>الربح</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- سجل المبيعات يظهر هنا -->
+        </tbody>
+    </table>
 
-<!-- محرر الأسعار -->
-<div id="priceEditor">
-  <h2>تعديل وإضافة المنتجات</h2>
-  <div id="priceList"></div>
-  <h3>إضافة منتج جديد</h3>
-  <input type="text" id="newProductName" placeholder="اسم المنتج" />
-  <input type="number" id="newProductPurchase" placeholder="سعر الشراء" />
-  <input type="number" id="newProductSale" placeholder="سعر البيع" />
-  <button onclick="addNewProduct()">أضف المنتج</button>
-  <p id="priceEditorError" class="error"></p>
-  <button onclick="togglePriceEditor()">إغلاق محرر الأسعار</button>
+    <button onclick="clearSales()" style="margin-top:20px; background:#d9534f;">حذف كل المبيعات</button>
 </div>
 
 <script>
-  // تحميل البيانات من localStorage أو ضبط بيانات أولية
-  let products = JSON.parse(localStorage.getItem('products')) || {
-    "كولون": { purchase: 6500, sale: 10999 },
-    "جرابات وسط": { purchase: 2500, sale: 3000 },
-    "جرابات ثقيل": { purchase: 3000, sale: 3500 },
-    "خف": { purchase: 2500, sale: 3000 },
-    "بوكسر محير": { purchase: 6000, sale: 8300 },
-    "لحمي قصير": { purchase: 2500, sale: 3500 },
-    "لحمي طويل": { purchase: 3500, sale: 4000 },
-    "كشكش": { purchase: 3000, sale: 3500 },
-    "ايميلي": { purchase: 9500, sale: 10000 },
-    "زنود": { purchase: 6000, sale: 7000 },
-    "شيال": { purchase: 10000, sale: 11000 },
-    "شيال رياضي": { purchase: 11000, sale: 12000 },
-    "طقم ولادي": { purchase: 8000, sale: 8500 },
-    "بوكسر رجالي": { purchase: 8300, sale: 9000 },
-    "بكلة فراشة": { purchase: 5000, sale: 5500 },
-    "مطاط": { purchase: 2000, sale: 2500 },
-    "عطر": { purchase: 5000, sale: 5500 },
-    "عدادات": { purchase: 7500, sale: 8000 }
-  };
+    // جلب بيانات المنتجات من localStorage أو إستخدام البيانات الافتراضية
+    let products = JSON.parse(localStorage.getItem('products')) || {
+        "كولون": 6500,
+        "جرابات وسط": 2500,
+        "جرابات ثقيل": 3000,
+        "خف": 2500,
+        "بوكسر محير": 6000,
+        "لحمي قصير": 2500,
+        "لحمي طويل": 3500,
+        "كشكش": 3000,
+        "ايميلي": 9500,
+        "زنود": 6000,
+        "شيال": 10000,
+        "شيال رياضي": 11000,
+        "طقم ولادي": 8000,
+        "بوكسر رجالي": 8300,
+        "بكلة فراشة": 5000,
+        "مطاط": 2000,
+        "عطر": 5000
+    };
 
-  const todayKey = new Date().toISOString().slice(0,10); // مفتاح يوم اليوم
+    // جلب بيانات المبيعات
+    let sales = JSON.parse(localStorage.getItem('sales')) || [];
 
-  let sales = JSON.parse(localStorage.getItem(todayKey)) || [];
-
-  const productSelect = document.getElementById('productSelect');
-  const quantityInput = document.getElementById('quantityInput');
-  const totalPriceInput = document.getElementById('totalPriceInput');
-  const salesTableBody = document.getElementById('salesTableBody');
-  const totalSalesSpan = document.getElementById('totalSales');
-  const totalProfitSpan = document.getElementById('totalProfit');
-
-  const priceEditorDiv = document.getElementById('priceEditor');
-  const priceListDiv = document.getElementById('priceList');
-  const priceEditorError = document.getElementById('priceEditorError');
-
-  // تهيئة قائمة المنتجات في الـselect
-  function loadProductOptions() {
-    productSelect.innerHTML = '';
-    for (const name in products) {
-      const option = document.createElement('option');
-      option.value = name;
-      option.textContent = name;
-      productSelect.appendChild(option);
-    }
-  }
-
-  // عرض قائمة الأسعار في محرر الأسعار
-  function renderPriceList() {
-    priceListDiv.innerHTML = '';
-    for (const name in products) {
-      const div = document.createElement('div');
-      div.style.marginBottom = '8px';
-
-      div.innerHTML = `
-        <input type="text" value="${name}" disabled style="width: 150px;" />
-        <input type="number" value="${products[name].purchase}" placeholder="سعر الشراء" id="purchase_${name}" style="width: 100px;" />
-        <input type="number" value="${products[name].sale}" placeholder="سعر البيع" id="sale_${name}" style="width: 100px;" />
-        <button onclick="updateProduct('${name}')">تعديل</button>
-        <button onclick="deleteProduct('${name}')">حذف</button>
-      `;
-      priceListDiv.appendChild(div);
-    }
-  }
-
-  // تعديل منتج
-  function updateProduct(name) {
-    const purchaseInput = document.getElementById('purchase_' + name);
-    const saleInput = document.getElementById('sale_' + name);
-    const p = parseInt(purchaseInput.value);
-    const s = parseInt(saleInput.value);
-
-    if (isNaN(p) || isNaN(s) || p <= 0 || s <= 0) {
-      priceEditorError.textContent = 'الرجاء إدخال أرقام صحيحة أكبر من صفر';
-      return;
-    }
-    priceEditorError.textContent = '';
-    products[name].purchase = p;
-    products[name].sale = s;
-    saveProducts();
-    loadProductOptions();
-    alert('تم تعديل المنتج');
-  }
-
-  // حذف منتج
-  function deleteProduct(name) {
-    if(confirm(`هل تريد حذف المنتج "${name}"؟`)) {
-      delete products[name];
-      saveProducts();
-      loadProductOptions();
-      renderPriceList();
-    }
-  }
-
-  // إضافة منتج جديد
-  function addNewProduct() {
-    const name = document.getElementById('newProductName').value.trim();
-    const purchase = parseInt(document.getElementById('newProductPurchase').value);
-    const sale = parseInt(document.getElementById('newProductSale').value);
-
-    if (!name || isNaN(purchase) || isNaN(sale) || purchase <= 0 || sale <= 0) {
-      priceEditorError.textContent = 'الرجاء تعبئة جميع الحقول بشكل صحيح';
-      return;
-    }
-    if (products[name]) {
-      priceEditorError.textContent = 'هذا المنتج موجود بالفعل';
-      return;
-    }
-    priceEditorError.textContent = '';
-
-    products[name] = { purchase: purchase, sale: sale };
-    saveProducts();
-    loadProductOptions();
-    renderPriceList();
-
-    // تفريغ الحقول
-    document.getElementById('newProductName').value = '';
-    document.getElementById('newProductPurchase').value = '';
-    document.getElementById('newProductSale').value = '';
-    alert('تم إضافة المنتج');
-  }
-
-  // حفظ المنتجات في التخزين المحلي
-  function saveProducts() {
-    localStorage.setItem('products', JSON.stringify(products));
-  }
-
-  // إضافة بيع جديد
-  function addSale() {
-    const productName = productSelect.value;
-    const qty = parseInt(quantityInput.value);
-    const totalPrice = parseInt(totalPriceInput.value);
-
-    if (!productName || isNaN(qty) || qty <= 0 || isNaN(totalPrice) || totalPrice <= 0) {
-      alert('الرجاء إدخال جميع القيم بشكل صحيح');
-      return;
+    // تحديث قائمة المنتجات في select
+    function updateProductSelect() {
+        const select = document.getElementById('productSelect');
+        select.innerHTML = '';
+        for (const [name, price] of Object.entries(products)) {
+            let option = document.createElement('option');
+            option.value = name;
+            option.textContent = `${name} - السعر الأساسي: ${price}`;
+            select.appendChild(option);
+        }
     }
 
-    const product = products[productName];
-    if (!product) {
-      alert('المنتج غير موجود!');
-      return;
+    // إضافة أو تعديل منتج
+    function addOrUpdateProduct() {
+        const nameInput = document.getElementById('productNameInput');
+        const priceInput = document.getElementById('productPriceInput');
+        const msg = document.getElementById('productMsg');
+
+        const name = nameInput.value.trim();
+        const price = Number(priceInput.value);
+
+        if (!name) {
+            msg.textContent = 'يرجى إدخال اسم المنتج';
+            return;
+        }
+        if (!price || price <= 0) {
+            msg.textContent = 'يرجى إدخال سعر صحيح أكبر من صفر';
+            return;
+        }
+
+        products[name] = price; // أضف أو عدل المنتج
+        localStorage.setItem('products', JSON.stringify(products));
+        msg.textContent = 'تمت الإضافة/التعديل بنجاح!';
+        nameInput.value = '';
+        priceInput.value = '';
+
+        updateProductSelect();
     }
 
-    const profit = totalPrice - (product.purchase * qty);
+    // إضافة مبيع
+    function addSale() {
+        const saleMsg = document.getElementById('saleMsg');
+        saleMsg.textContent = '';
 
-    sales.push({
-      product: productName,
-      quantity: qty,
-      totalPrice: totalPrice,
-      profit: profit
-    });
+        const product = document.getElementById('productSelect').value;
+        const quantity = Number(document.getElementById('quantityInput').value);
+        const totalPrice = Number(document.getElementById('totalPriceInput').value);
 
-    saveSales();
-    renderSales();
+        if (!product) {
+            saleMsg.textContent = 'اختر المنتج من القائمة';
+            return;
+        }
+        if (!quantity || quantity <= 0) {
+            saleMsg.textContent = 'أدخل عدد قطع صحيح أكبر من صفر';
+            return;
+        }
+        if (!totalPrice || totalPrice <= 0) {
+            saleMsg.textContent = 'أدخل سعر بيع إجمالي صحيح';
+            return;
+        }
 
-    // تفريغ المدخلات
-    quantityInput.value = 1;
-    totalPriceInput.value = 0;
-  }
+        // حساب الربح
+        const costPrice = products[product];
+        const profit = totalPrice - (costPrice * quantity);
 
-  // حفظ مبيعات اليوم في التخزين المحلي
-  function saveSales() {
-    localStorage.setItem(todayKey, JSON.stringify(sales));
-  }
+        // تخزين المبيع
+        sales.push({
+            product,
+            quantity,
+            totalPrice,
+            profit,
+            date: new Date().toLocaleDateString()
+        });
+        localStorage.setItem('sales', JSON.stringify(sales));
 
-  // حذف بيع معين من قائمة اليوم
-  function deleteSale(index) {
-    if(confirm('هل تريد حذف هذه المبيعة؟')) {
-      sales.splice(index, 1);
-      saveSales();
-      renderSales();
+        displaySales();
+
+        // إعادة تعيين الحقول
+        document.getElementById('quantityInput').value = '';
+        document.getElementById('totalPriceInput').value = '';
     }
-  }
 
-  // تعديل بيع (سهل نعمل تعديل بسيط يعيد بيانات البيع للحقول)
-  function editSale(index) {
-    const sale = sales[index];
-    productSelect.value = sale.product;
-    quantityInput.value = sale.quantity;
-    totalPriceInput.value = sale.totalPrice;
+    // عرض المبيعات في الجدول
+    function displaySales() {
+        const tbody = document.querySelector('#salesTable tbody');
+        tbody.innerHTML = '';
+        sales.forEach(sale => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${sale.product}</td>
+                <td>${sale.quantity}</td>
+                <td>${sale.totalPrice}</td>
+                <td>${sale.profit}</td>
+                <td>${sale.date}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 
-    // حذف البيع القديم لأنه راح تعدل عليه
-    sales.splice(index,1);
-    saveSales();
-    renderSales();
+    // حذف
