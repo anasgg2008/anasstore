@@ -1,143 +1,160 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل المبيعات اليومية</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل المبيعات</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input, select, button { display: block; margin: 10px 0; padding: 8px; width: 100%; max-width: 300px; }
-    table { border-collapse: collapse; margin-top: 20px; width: 100%; max-width: 600px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #eee; }
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    input, select, button {
+      margin: 5px;
+      padding: 10px;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    .delete-btn {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h2>تسجيل المبيعات اليومية</h2>
 
-  <label>اسم المنتج:</label>
-  <select id="productName">
-    <option value="كولون">كولون</option>
-    <option value="جرابات وسط">جرابات وسط</option>
-    <option value="جرابات ثقيل">جرابات ثقيل</option>
-    <option value="خف">خف</option>
-    <option value="بوكسر محير">بوكسر محير</option>
-    <option value="لحمي قصير">لحمي قصير</option>
-    <option value="لحمي طويل">لحمي طويل</option>
-    <option value="كشكش">كشكش</option>
-    <option value="ايميلي">ايميلي</option>
-    <option value="زنود">زنود</option>
-    <option value="شيال">شيال</option>
-    <option value="شيال رياضي">شيال رياضي</option>
-    <option value="طقم ولادي">طقم ولادي</option>
-    <option value="بوكسر رجالي">بوكسر رجالي</option>
-    <option value="بكلة فراشة">بكلة فراشة</option>
-    <option value="مطاط">مطاط</option>
-    <option value="عطر">عطر</option>
-  </select>
+<h2>تسجيل المبيعات اليومية</h2>
 
-  <label>الكمية:</label>
-  <input type="number" id="quantity" min="1" />
+<label>اختر الغرض:</label>
+<select id="item">
+  <option value="جرابات وسط">جرابات وسط</option>
+  <option value="جرابات ثقيل">جرابات ثقيل</option>
+  <option value="خف">خف</option>
+  <option value="بوكسر محير">بوكسر محير</option>
+  <option value="لحمي قصير">لحمي قصير</option>
+  <option value="لحمي طويل">لحمي طويل</option>
+  <option value="كشكش">كشكش</option>
+  <option value="ايميلي">ايميلي</option>
+  <option value="زنود">زنود</option>
+  <option value="شيال">شيال</option>
+  <option value="شيال رياضي">شيال رياضي</option>
+  <option value="طقم ولادي">طقم ولادي</option>
+  <option value="بوكسر رجالي">بوكسر رجالي</option>
+  <option value="بكلة فراشة">بكلة فراشة</option>
+  <option value="مطاط">مطاط</option>
+  <option value="عطر">عطر</option>
+  <option value="كولون">كولون</option>
+  <option value="عدادات">عدادات</option>
+</select>
 
-  <label>السعر الكلي للبيع:</label>
-  <input type="number" id="totalSalePrice" min="0" />
+<br>
+<label>الكمية المباعة:</label>
+<input type="number" id="quantity" />
+<br>
+<label>السعر الإجمالي للبيع:</label>
+<input type="number" id="totalPrice" />
+<br>
+<button onclick="addSale()">إضافة</button>
 
-  <button onclick="addSale()">أضف المبيع</button>
+<table>
+  <thead>
+    <tr>
+      <th>الغرض</th>
+      <th>الكمية</th>
+      <th>سعر البيع</th>
+      <th>سعر الشراء</th>
+      <th>الربح</th>
+      <th>حذف</th>
+    </tr>
+  </thead>
+  <tbody id="salesTable"></tbody>
+</table>
 
-  <h3>مبيعات اليوم (<span id="todayDate"></span>)</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>المنتج</th>
-        <th>الكمية</th>
-        <th>سعر البيع الكلي</th>
-        <th>الربح</th>
-      </tr>
-    </thead>
-    <tbody id="salesBody"></tbody>
-  </table>
-
-  <h4>الإجمالي</h4>
-  <p>إجمالي المبيع: <span id="totalSales">0</span> ل.س</p>
-  <p>إجمالي الربح: <span id="totalProfit">0</span> ل.س</p>
+<h3 id="summary"></h3>
 
 <script>
-const purchasePrices = {
-  "كولون": 6500,
-  "جرابات وسط": 2500,
-  "جرابات ثقيل": 3000,
-  "خف": 2500,
-  "بوكسر محير": 6000,
-  "لحمي قصير": 2500,
-  "لحمي طويل": 3500,
-  "كشكش": 3000,
-  "ايميلي": 9500,
-  "زنود": 6000,
-  "شيال": 10000,
-  "شيال رياضي": 11000,
-  "طقم ولادي": 8000,
-  "بوكسر رجالي": 8300,
-  "بكلة فراشة": 5000,
-  "مطاط": 2000,
-  "عطر": 5000
-};
+  const basePrices = {
+    "جرابات وسط": 2500,
+    "جرابات ثقيل": 3000,
+    "خف": 2500,
+    "بوكسر محير": 6000,
+    "لحمي قصير": 2500,
+    "لحمي طويل": 3500,
+    "كشكش": 3000,
+    "ايميلي": 9500,
+    "زنود": 6000,
+    "شيال": 10000,
+    "شيال رياضي": 11000,
+    "طقم ولادي": 8000,
+    "بوكسر رجالي": 8300,
+    "بكلة فراشة": 5000,
+    "مطاط": 2000,
+    "عطر": 5000,
+    "كولون": 6500,
+    "عدادات": 7500
+  };
 
-const today = new Date().toISOString().split('T')[0];
-document.getElementById("todayDate").textContent = today;
+  const sales = [];
 
-function loadSales() {
-  return JSON.parse(localStorage.getItem("sales_" + today)) || [];
-}
+  function addSale() {
+    const item = document.getElementById("item").value;
+    const quantity = parseInt(document.getElementById("quantity").value);
+    const totalPrice = parseInt(document.getElementById("totalPrice").value);
+    if (!item || !quantity || !totalPrice) {
+      alert("يرجى تعبئة جميع الحقول");
+      return;
+    }
 
-function saveSales(sales) {
-  localStorage.setItem("sales_" + today, JSON.stringify(sales));
-}
+    const cost = basePrices[item] * quantity;
+    const profit = totalPrice - cost;
 
-function addSale() {
-  const product = document.getElementById("productName").value;
-  const quantity = parseInt(document.getElementById("quantity").value);
-  const totalSale = parseInt(document.getElementById("totalSalePrice").value);
-
-  if (!product || quantity <= 0 || totalSale <= 0) {
-    alert("يرجى تعبئة كل الحقول بشكل صحيح");
-    return;
+    sales.push({ item, quantity, totalPrice, cost, profit });
+    renderTable();
   }
 
-  const unitCost = purchasePrices[product];
-  const totalCost = unitCost * quantity;
-  const profit = totalSale - totalCost;
-
-  const sales = loadSales();
-  sales.push({ product, quantity, totalSale, profit });
-  saveSales(sales);
-  displaySales();
-}
-
-function displaySales() {
-  const sales = loadSales();
-  const tbody = document.getElementById("salesBody");
-  tbody.innerHTML = "";
-
-  let totalSales = 0;
-  let totalProfit = 0;
-
-  for (const sale of sales) {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${sale.product}</td>
-      <td>${sale.quantity}</td>
-      <td>${sale.totalSale.toLocaleString()}</td>
-      <td>${sale.profit.toLocaleString()}</td>
-    `;
-    tbody.appendChild(row);
-    totalSales += sale.totalSale;
-    totalProfit += sale.profit;
+  function deleteSale(index) {
+    sales.splice(index, 1);
+    renderTable();
   }
 
-  document.getElementById("totalSales").textContent = totalSales.toLocaleString();
-  document.getElementById("totalProfit").textContent = totalProfit.toLocaleString();
-}
+  function renderTable() {
+    const table = document.getElementById("salesTable");
+    table.innerHTML = "";
+    let totalSales = 0;
+    let totalProfit = 0;
 
-window.onload = displaySales;
+    sales.forEach((sale, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${sale.item}</td>
+        <td>${sale.quantity}</td>
+        <td>${sale.totalPrice}</td>
+        <td>${sale.cost}</td>
+        <td>${sale.profit}</td>
+        <td><button class="delete-btn" onclick="deleteSale(${index})">حذف</button></td>
+      `;
+      table.appendChild(row);
+
+      totalSales += sale.totalPrice;
+      totalProfit += sale.profit;
+    });
+
+    document.getElementById("summary").textContent =
+      `إجمالي المبيع: ${totalSales} ل.س | إجمالي الربح: ${totalProfit} ل.س`;
+  }
 </script>
+
 </body>
 </html>
