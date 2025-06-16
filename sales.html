@@ -16,6 +16,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
     }
     .menu-btn {
       font-size: 28px;
@@ -24,6 +25,30 @@
       color: white;
       cursor: pointer;
       padding: 5px 10px;
+    }
+    #menu {
+      display: none;
+      position: absolute;
+      left: 10px;
+      top: 40px;
+      background-color: #222;
+      border: 1px solid #444;
+      border-radius: 10px;
+      z-index: 999;
+      padding: 10px;
+      min-width: 150px;
+    }
+    #menu a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin-bottom: 5px;
+      font-size: 16px;
+      padding: 5px;
+      border-radius: 6px;
+    }
+    #menu a:hover {
+      background-color: #444;
     }
     h1 {
       text-align: center;
@@ -75,14 +100,32 @@
     #exportBtn:hover {
       background-color: #004d99;
     }
+    .delete-btn {
+      background-color: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      float: left;
+      margin-top: -30px;
+    }
+    .delete-btn:hover {
+      background-color: #b30000;
+    }
   </style>
 </head>
 <body>
 
   <div class="top-bar">
-    <span></span>
+    <button class="menu-btn" onclick="toggleMenu()">⋮</button>
     <h1>📅 سجل المبيعات اليومية</h1>
-    <button class="menu-btn">⋮</button>
+    <div id="menu">
+      <a href="index.html">🏠 الواجهة الرئيسية</a>
+      <a href="products.html">➕ إضافة منتج</a>
+      <a href="sales.html">📊 سجل المبيعات</a>
+    </div>
   </div>
 
   <div class="note">🗂️ تحتوي هذه الصفحة على كل المبيعات التي تم حفظها من جهازك حسب الأيام.</div>
@@ -96,7 +139,7 @@
     const exportBtn = document.getElementById("exportBtn");
     const salesData = [];
 
-    // قراءة كل المفاتيح اللي بتبدأ بـ sales-
+    // قراءة جميع المفاتيح التي تبدأ بـ sales-
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith("sales-")) {
@@ -106,7 +149,7 @@
       }
     }
 
-    // ترتيب الأيام من الأحدث إلى الأقدم
+    // ترتيب من الأحدث إلى الأقدم
     salesData.sort((a, b) => b.day.localeCompare(a.day));
 
     salesData.forEach(({ day, data }) => {
@@ -118,20 +161,22 @@
       let text = "";
 
       data.forEach(item => {
-        totalProfit += parseFloat(item.profit);
+        const profit = parseFloat(item.profit || (item.sellPrice - (item.costPrice * item.quantity)));
+        totalProfit += profit;
         totalSales += 1;
-        text += `📦 المنتج: ${item.product}\n🔢 الكمية: ${item.quantity}\n💰 السعر الإجمالي: ${item.total} ل.س\n💵 الربح: ${item.profit} ل.س\n🕒 الوقت: ${item.time}\n\n`;
+        text += `📦 المنتج: ${item.product}\n🔢 الكمية: ${item.quantity}\n💰 السعر الإجمالي: ${item.sellPrice} ل.س\n💵 الربح: ${profit.toFixed(0)} ل.س\n🕒 الوقت: ${item.time}\n\n`;
       });
 
       container.innerHTML = `
+        <button class="delete-btn" onclick="deleteDay('${day}')">🗑️ حذف هذا اليوم</button>
         <h3>📆 ${day}</h3>
-        <div class="summary">عدد المبيعات: ${totalSales} — الربح الكلي: ${totalProfit} ل.س</div>
+        <div class="summary">عدد المبيعات: ${totalSales} — الربح الكلي: ${totalProfit.toFixed(0)} ل.س</div>
         <pre>${text}</pre>
       `;
+
       salesDiv.appendChild(container);
     });
 
-    // زر تصدير البيانات
     exportBtn.addEventListener("click", () => {
       const exportObj = {};
       salesData.forEach(({ day, data }) => {
@@ -149,6 +194,20 @@
 
       URL.revokeObjectURL(url);
     });
+
+    function deleteDay(day) {
+      const confirmDelete = confirm(`هل أنت متأكد أنك تريد حذف المبيعات ليوم ${day}؟`);
+      if (!confirmDelete) return;
+
+      localStorage.removeItem("sales-" + day);
+      localStorage.removeItem("profit-" + day);
+      location.reload();
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
   </script>
 
 </body>
