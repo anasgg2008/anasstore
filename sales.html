@@ -10,16 +10,44 @@
       color: white;
       font-family: sans-serif;
       padding: 20px;
+      direction: rtl;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .menu-btn {
+      font-size: 28px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+    h1 {
+      text-align: center;
+      margin: 10px 0 5px;
+    }
+    .note {
+      text-align: center;
+      color: #ccc;
+      margin-bottom: 25px;
+      font-size: 14px;
     }
     .day {
       border: 1px solid #444;
       border-radius: 10px;
-      margin: 10px 0;
-      padding: 10px;
+      margin: 15px 0;
+      padding: 15px;
       background-color: #222;
     }
     .day h3 {
       margin: 0 0 10px 0;
+    }
+    .summary {
+      margin-bottom: 10px;
+      color: #aaa;
     }
     pre {
       background-color: #333;
@@ -29,34 +57,99 @@
       white-space: pre-wrap;
       word-wrap: break-word;
     }
+    #exportBtn {
+      background-color: #0066cc;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 0 8px #005bb5;
+      margin-bottom: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      transition: background-color 0.3s;
+    }
+    #exportBtn:hover {
+      background-color: #004d99;
+    }
   </style>
 </head>
 <body>
-  <h1>📅 سجل المبيعات اليومية</h1>
+
+  <div class="top-bar">
+    <span></span>
+    <h1>📅 سجل المبيعات اليومية</h1>
+    <button class="menu-btn">⋮</button>
+  </div>
+
+  <div class="note">🗂️ تحتوي هذه الصفحة على كل المبيعات التي تم حفظها من جهازك حسب الأيام.</div>
+
+  <button id="exportBtn">⬇️ تصدير البيانات كملف JSON</button>
+
   <div id="sales"></div>
 
   <script>
     const salesDiv = document.getElementById("sales");
+    const exportBtn = document.getElementById("exportBtn");
+    const salesData = [];
 
-    // نقرأ كل المفاتيح في localStorage اللي بتبدأ بـ sales-
+    // قراءة كل المفاتيح اللي بتبدأ بـ sales-
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith("sales-")) {
         const day = key.replace("sales-", "");
         const data = JSON.parse(localStorage.getItem(key));
-
-        const container = document.createElement("div");
-        container.className = "day";
-
-        let text = "";
-        data.forEach(item => {
-          text += `المنتج: ${item.product}\nالكمية: ${item.quantity}\nإجمالي السعر: ${item.total} ل.س\nالربح: ${item.profit} ل.س\nالوقت: ${item.time}\n\n`;
-        });
-
-        container.innerHTML = `<h3>📆 ${day}</h3><pre>${text}</pre>`;
-        salesDiv.appendChild(container);
+        salesData.push({ day, data });
       }
     }
+
+    // ترتيب الأيام من الأحدث إلى الأقدم
+    salesData.sort((a, b) => b.day.localeCompare(a.day));
+
+    salesData.forEach(({ day, data }) => {
+      const container = document.createElement("div");
+      container.className = "day";
+
+      let totalProfit = 0;
+      let totalSales = 0;
+      let text = "";
+
+      data.forEach(item => {
+        totalProfit += parseFloat(item.profit);
+        totalSales += 1;
+        text += `📦 المنتج: ${item.product}\n🔢 الكمية: ${item.quantity}\n💰 السعر الإجمالي: ${item.total} ل.س\n💵 الربح: ${item.profit} ل.س\n🕒 الوقت: ${item.time}\n\n`;
+      });
+
+      container.innerHTML = `
+        <h3>📆 ${day}</h3>
+        <div class="summary">عدد المبيعات: ${totalSales} — الربح الكلي: ${totalProfit} ل.س</div>
+        <pre>${text}</pre>
+      `;
+      salesDiv.appendChild(container);
+    });
+
+    // زر تصدير البيانات
+    exportBtn.addEventListener("click", () => {
+      const exportObj = {};
+      salesData.forEach(({ day, data }) => {
+        exportObj[day] = data;
+      });
+
+      const jsonStr = JSON.stringify(exportObj, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sales-data.json";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    });
   </script>
+
 </body>
 </html>
