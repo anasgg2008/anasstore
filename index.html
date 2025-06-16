@@ -27,13 +27,15 @@
       flex-wrap: wrap;
     }
     .box {
-      background-color: #222;
-      padding: 30px;
-      border-radius: 20px;
-      width: 200px;
-      text-align: center;
-      box-shadow: 0 0 15px #555;
-      font-size: 20px;
+  background-color: #222;
+  padding: 30px;
+  border-radius: 20px;
+  width: 200px;
+  text-align: center;
+  box-shadow:
+    0 0 8px #ff0000,      /* نيون أحمر خارجي */
+    inset 0 0 10px #ff0000; /* توهّج داخلي */
+  font-size: 20px;
     }
     input[type="number"], select {
       width: 100%;
