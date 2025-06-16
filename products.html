@@ -2,96 +2,49 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>إضافة وتعديل المنتجات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>صفحة إضافة المنتجات</title>
   <style>
     body {
       background-color: #111;
       color: white;
       font-family: sans-serif;
       padding: 20px;
-      min-height: 100vh;
       direction: rtl;
-      position: relative;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 28px;
-      position: relative;
     }
     form {
       max-width: 400px;
-      margin: 0 auto 30px auto;
+      margin: 0 auto;
       background-color: #222;
       padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px #444;
+      border-radius: 10px;
     }
     label {
       display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 18px;
     }
-    input[type="text"],
-    input[type="number"] {
+    input, button {
       width: 100%;
-      padding: 8px;
+      padding: 10px;
       margin-bottom: 15px;
       border-radius: 8px;
       border: none;
+      font-size: 16px;
+    }
+    input {
       background-color: #333;
       color: white;
-      font-size: 16px;
-      box-sizing: border-box;
     }
     button {
-      background-color: red;
-      border: none;
+      background-color: crimson;
       color: white;
-      padding: 12px 20px;
-      font-size: 18px;
-      border-radius: 15px;
       cursor: pointer;
-      width: 100%;
-      box-shadow: 0 0 10px red;
+      box-shadow: 0 0 8px #b30000;
       transition: background-color 0.3s;
     }
     button:hover {
-      background-color: #b30000;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 30px;
-      background-color: #222;
-      border-radius: 15px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px;
-      text-align: center;
-      border-bottom: 1px solid #444;
-      font-size: 16px;
-    }
-    th {
-      background-color: #333;
-    }
-    tr:hover {
-      background-color: #333;
-    }
-    .delete-btn {
-      background-color: #800000;
-      border: none;
-      color: white;
-      padding: 6px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.3s;
-    }
-    .delete-btn:hover {
-      background-color: #b30000;
+      background-color: #a00000;
     }
     #menuBtn {
       position: fixed;
@@ -103,9 +56,9 @@
       color: white;
       cursor: pointer;
       z-index: 1000;
+      padding: 0;
       user-select: none;
       outline: none;
-      padding: 0;
     }
     #dropdownMenu {
       display: none;
@@ -114,19 +67,17 @@
       left: 20px;
       background-color: #222;
       border-radius: 10px;
-      box-shadow: 0 0 10px #000;
       width: 180px;
       z-index: 999;
       user-select: none;
+      box-shadow: 0 0 10px #000;
     }
     #dropdownMenu a {
-      display: block;
       color: white;
       padding: 12px 15px;
+      display: block;
       text-decoration: none;
       border-bottom: 1px solid #444;
-      font-size: 16px;
-      transition: background-color 0.2s;
     }
     #dropdownMenu a:last-child {
       border-bottom: none;
@@ -138,126 +89,69 @@
 </head>
 <body>
 
-  <button id="menuBtn">⋮</button>
-  <div id="dropdownMenu">
-    <a href="index.html">الصفحة الرئيسية</a>
-    <a href="sales.html">سجل المبيعات</a>
-    <a href="#" id="closeMenu">إغلاق القائمة</a>
-  </div>
+<button id="menuBtn">⋮</button>
+<div id="dropdownMenu">
+  <a href="index.html">🏠 الصفحة الرئيسية</a>
+  <a href="products.html">➕ إضافة منتجات</a>
+  <a href="sales.html">📊 سجل المبيعات</a>
+</div>
 
-  <h1>إضافة وتعديل المنتجات</h1>
+<h1 style="text-align:center; margin-top: 80px;">➕ إضافة منتج جديد</h1>
+<form id="productForm">
+  <label for="productName">اسم المنتج</label>
+  <input type="text" id="productName" required autocomplete="off"/>
 
-  <form id="productForm">
-    <label for="productName">اسم المنتج</label>
-    <input type="text" id="productName" placeholder="مثلاً: جرابات" required />
+  <label for="costPrice">سعر التكلفة (ل.س)</label>
+  <input type="number" id="costPrice" min="0" step="any" required/>
 
-    <label for="productCost">سعر الشراء الأساسي (ل.س)</label>
-    <input type="number" id="productCost" min="1" placeholder="مثلاً: 1000" required />
+  <label for="sellPrice">سعر البيع (ل.س)</label>
+  <input type="number" id="sellPrice" min="0" step="any" required/>
 
-    <button type="submit">أضف / حدّث المنتج</button>
-  </form>
+  <button type="submit">حفظ المنتج</button>
+</form>
 
-  <table id="productsTable">
-    <thead>
-      <tr>
-        <th>اسم المنتج</th>
-        <th>سعر الشراء الأساسي</th>
-        <th>حذف</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
+<script>
+  const menuBtn = document.getElementById("menuBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
 
-  <script>
-    const productForm = document.getElementById("productForm");
-    const productNameInput = document.getElementById("productName");
-    const productCostInput = document.getElementById("productCost");
-    const productsTableBody = document.querySelector("#productsTable tbody");
+  menuBtn.onclick = () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  };
 
-    let products = JSON.parse(localStorage.getItem("products")) || {};
+  window.onclick = (e) => {
+    if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.style.display = "none";
+    }
+  };
 
-    function updateTable() {
-      productsTableBody.innerHTML = "";
-      for (let name in products) {
-        const tr = document.createElement("tr");
+  const form = document.getElementById("productForm");
 
-        const tdName = document.createElement("td");
-        tdName.textContent = name;
-        tr.appendChild(tdName);
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const name = document.getElementById("productName").value.trim();
+    const cost = parseFloat(document.getElementById("costPrice").value);
+    const sell = parseFloat(document.getElementById("sellPrice").value);
 
-        const tdCost = document.createElement("td");
-        tdCost.textContent = products[name].cost;
-        tr.appendChild(tdCost);
-
-        const tdDelete = document.createElement("td");
-        const btnDelete = document.createElement("button");
-        btnDelete.textContent = "حذف";
-        btnDelete.className = "delete-btn";
-        btnDelete.onclick = () => {
-          if(confirm(`هل تريد حذف المنتج "${name}"؟`)){
-            delete products[name];
-            saveProducts();
-            updateTable();
-          }
-        };
-        tdDelete.appendChild(btnDelete);
-        tr.appendChild(tdDelete);
-
-        productsTableBody.appendChild(tr);
-      }
+    if (!name || isNaN(cost) || isNaN(sell) || cost < 0 || sell < 0) {
+      alert("الرجاء تعبئة الحقول بشكل صحيح.");
+      return;
     }
 
-    function saveProducts() {
-      localStorage.setItem("products", JSON.stringify(products));
+    let products = JSON.parse(localStorage.getItem("products") || "[]");
+
+    // تحقق من وجود المنتج مسبقاً، إذا موجود حدثه
+    const existingIndex = products.findIndex(p => p.name === name);
+    if (existingIndex !== -1) {
+      products[existingIndex] = { name, costPrice: cost, sellPrice: sell };
+    } else {
+      products.push({ name, costPrice: cost, sellPrice: sell });
     }
 
-    productForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const name = productNameInput.value.trim();
-      const cost = parseFloat(productCostInput.value);
-
-      if (!name) {
-        alert("يرجى إدخال اسم المنتج");
-        return;
-      }
-      if (!cost || cost <= 0) {
-        alert("يرجى إدخال سعر شراء صحيح أكبر من صفر");
-        return;
-      }
-
-      products[name] = { cost };
-      saveProducts();
-      updateTable();
-
-      productForm.reset();
-    });
-
-    updateTable();
-
-    const menuBtn = document.getElementById("menuBtn");
-    const dropdownMenu = document.getElementById("dropdownMenu");
-    const closeMenuLink = document.getElementById("closeMenu");
-
-    menuBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
-    });
-
-    dropdownMenu.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-
-    closeMenuLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      dropdownMenu.style.display = "none";
-    });
-
-    document.addEventListener("click", () => {
-      dropdownMenu.style.display = "none";
-    });
-  </script>
+    localStorage.setItem("products", JSON.stringify(products));
+    alert("تم حفظ المنتج بنجاح!");
+    form.reset();
+  });
+</script>
 
 </body>
 </html>
