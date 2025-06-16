@@ -1,25 +1,4 @@
 <!DOCTYPE html>
-<html lang="ar">
-<head>
-  <!-- أكواد الـ head المعتادة -->
-</head>
-<body>
-
-  <!-- 🔥 هون بتحط كود القائمة -->
-  <div style="position: absolute; top: 10px; right: 10px;">
-    <button onclick="toggleMenu()" style="background: none; border: none; font-size: 24px;">⋮</button>
-    <div id="menu" style="display: none; background: white; border: 1px solid #ccc; padding: 10px; position: absolute; right: 0;">
-      <a href="index.html">🏠 الواجهة الرئيسية</a><br>
-      <a href="products.html">➕ إضافة منتج</a><br>
-      <a href="sales.html">📊 سجل المبيعات</a><br>
-      <button onclick="toggleDarkMode()">🌙 الوضع الداكن</button>
-    </div>
-  </div>
-
-  <!-- تابع الكود الموجود عندك -->
-
-</body>
-</html><!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -86,31 +65,65 @@
       font-size: 22px;
       text-align: center;
     }
+    /* قائمة النقاط الثلاث */
+    #menu-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+    }
+    #menu {
+      display: none;
+      background: #222;
+      border: 1px solid #444;
+      padding: 10px;
+      position: absolute;
+      top: 40px;
+      right: 10px;
+      z-index: 999;
+    }
+    #menu a, #menu button {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin-bottom: 5px;
+      background: none;
+      border: none;
+      text-align: right;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
 
+  <!-- قائمة النقاط الثلاث -->
+  <button id="menu-btn" onclick="toggleMenu()">⋮</button>
+  <div id="menu">
+    <a href="index.html">🏠 الواجهة الرئيسية</a>
+    <a href="products.html">➕ إضافة منتج</a>
+    <a href="sales.html">📊 سجل المبيعات</a>
+  </div>
+
   <h1>واجهة البيع</h1>
 
   <div class="triangle-container">
-
     <div class="box">
       اختر المنتج
       <select id="productSelect">
         <option value="" disabled selected>اختر المنتج</option>
       </select>
     </div>
-
     <div class="box">
       العدد
       <input type="number" id="quantityInput" min="1" value="1" />
     </div>
-
     <div class="box">
       إجمالي السعر (سعر البيع)
       <input type="number" id="totalPriceInput" min="1" placeholder="مثلاً: 20000" />
     </div>
-
   </div>
 
   <button class="save-btn" id="saveBtn">احفظ</button>
@@ -122,7 +135,7 @@
   </div>
 
 <script>
-  // جلب المنتجات من localStorage (الأسعار الشراء الأساسية)
+  // المنتجات من localStorage
   let products = JSON.parse(localStorage.getItem("products")) || {};
   
   const productSelect = document.getElementById("productSelect");
@@ -133,11 +146,14 @@
   const totalSales = document.getElementById("totalSales");
   const saveBtn = document.getElementById("saveBtn");
 
-  // بيانات مبيعات اليوم
   let todaySales = JSON.parse(localStorage.getItem(getTodayKey("sales"))) || [];
   let todayProfit = parseFloat(localStorage.getItem(getTodayKey("profit"))) || 0;
 
-  // تعمير اختيار المنتج بالاسم
+  function getTodayKey(type) {
+    const today = new Date().toISOString().slice(0,10);
+    return `${type}-${today}`;
+  }
+
   function populateProducts() {
     for (const name in products) {
       const option = document.createElement("option");
@@ -147,13 +163,6 @@
     }
   }
 
-  // دالة للحصول على مفتاح اليوم
-  function getTodayKey(type) {
-    const today = new Date().toISOString().slice(0,10);
-    return `${type}-${today}`;
-  }
-
-  // تحديث عرض الملخص
   function updateSummary() {
     let totalQuantity = todaySales.reduce((acc, item) => acc + item.quantity, 0);
     let totalSaleValue = todaySales.reduce((acc, item) => acc + item.sellPrice, 0);
@@ -162,14 +171,12 @@
     totalSales.textContent = totalSaleValue.toFixed(0);
   }
 
-  // حساب الربح من الإدخالات الحالية
   function calculateProfit(productName, quantity, totalSellPrice) {
     if (!products[productName]) return 0;
     let costPrice = products[productName].cost * quantity;
     return totalSellPrice - costPrice;
   }
 
-  // عند تغيير السعر أو العدد أو المنتج، نحدث الربح المعروض تلقائياً
   function onInputChange() {
     const prod = productSelect.value;
     const qty = parseInt(quantityInput.value) || 0;
@@ -182,28 +189,18 @@
     }
   }
 
-  // حفظ البيع في اليوم الحالي
   function saveSale() {
     const prod = productSelect.value;
     const qty = parseInt(quantityInput.value);
     const sellPrice = parseFloat(totalPriceInput.value);
-    if (!prod) {
-      alert("يرجى اختيار المنتج");
-      return;
-    }
-    if (!qty || qty <= 0) {
-      alert("يرجى إدخال عدد صحيح أكبر من صفر");
-      return;
-    }
-    if (!sellPrice || sellPrice <= 0) {
-      alert("يرجى إدخال سعر بيع صحيح");
+    if (!prod || qty <= 0 || sellPrice <= 0) {
+      alert("يرجى إدخال البيانات بشكل صحيح");
       return;
     }
 
     const costPrice = products[prod].cost * qty;
     const profit = sellPrice - costPrice;
 
-    // إضافة البيع لبيانات اليوم
     todaySales.push({
       product: prod,
       quantity: qty,
@@ -211,32 +208,32 @@
       costPrice: products[prod].cost
     });
 
-    // تحديث الربح الإجمالي لليوم
     todayProfit += profit;
 
-    // حفظ في localStorage
     localStorage.setItem(getTodayKey("sales"), JSON.stringify(todaySales));
     localStorage.setItem(getTodayKey("profit"), todayProfit.toString());
 
     updateSummary();
 
-    // مسح المدخلات بعد الحفظ
     productSelect.value = "";
     quantityInput.value = 1;
     totalPriceInput.value = "";
-
     profitDisplay.textContent = "0";
   }
 
-  // الأحداث
   productSelect.addEventListener("change", onInputChange);
   quantityInput.addEventListener("input", onInputChange);
   totalPriceInput.addEventListener("input", onInputChange);
   saveBtn.addEventListener("click", saveSale);
 
-  // تعمير الصفحة
   populateProducts();
   updateSummary();
+
+  // قائمة النقاط الثلاث
+  function toggleMenu() {
+    const menu = document.getElementById("menu");
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+  }
 </script>
 
 </body>
