@@ -13,10 +13,30 @@
       min-height: 100vh;
       direction: rtl;
     }
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .menu-btn {
+      font-size: 28px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      margin: 10px 0;
       font-size: 28px;
+    }
+    .note {
+      text-align: center;
+      color: #ccc;
+      margin-bottom: 25px;
+      font-size: 14px;
     }
     form {
       max-width: 400px;
@@ -95,7 +115,15 @@
 </head>
 <body>
 
-  <h1>إضافة وتعديل المنتجات</h1>
+  <div class="top-bar">
+    <span></span> <!-- لتوسيط العنوان تحت الثلاث نقاط -->
+    <h1>إضافة وتعديل المنتجات</h1>
+    <button class="menu-btn">⋮</button>
+  </div>
+
+  <div class="note">
+    ⚠️ البيانات تنحفظ فقط على هذا الجهاز، كل مستخدم له بياناته الخاصة.
+  </div>
 
   <form id="productForm">
     <label for="productName">اسم المنتج</label>
@@ -126,10 +154,8 @@
     const productCostInput = document.getElementById("productCost");
     const productsTableBody = document.querySelector("#productsTable tbody");
 
-    // جلب المنتجات من localStorage أو إنشاء جديد
     let products = JSON.parse(localStorage.getItem("products")) || {};
 
-    // تحديث جدول عرض المنتجات
     function updateTable() {
       productsTableBody.innerHTML = "";
       for (let name in products) {
@@ -161,12 +187,10 @@
       }
     }
 
-    // حفظ المنتجات في localStorage
     function saveProducts() {
       localStorage.setItem("products", JSON.stringify(products));
     }
 
-    // التعامل مع إضافة / تعديل منتج جديد
     productForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
@@ -185,7 +209,6 @@
       products[name] = { cost };
       saveProducts();
       updateTable();
-
       productForm.reset();
     });
 
