@@ -67,11 +67,10 @@
       font-size: 22px;
       text-align: center;
     }
-    /* قائمة النقاط الثلاث */
     #menu-btn {
       position: absolute;
       top: 10px;
-      left: 10px; /* عشان يمين-يسار حسب RTL ممكن تحط left بدل right */
+      left: 10px;
       font-size: 24px;
       background: none;
       border: none;
@@ -91,28 +90,24 @@
       border-radius: 10px;
       min-width: 150px;
     }
-    #menu a, #menu button {
+    #menu a {
       display: block;
       color: white;
       text-decoration: none;
       margin-bottom: 5px;
-      background: none;
-      border: none;
       text-align: right;
-      cursor: pointer;
       font-size: 16px;
       padding: 5px 10px;
       border-radius: 6px;
       transition: background-color 0.2s;
     }
-    #menu a:hover, #menu button:hover {
+    #menu a:hover {
       background-color: #444;
     }
   </style>
 </head>
 <body>
-
-  <!-- قائمة النقاط الثلاث -->
+  <!-- زر القائمة -->
   <button id="menu-btn" onclick="toggleMenu()">⋮</button>
   <div id="menu" aria-label="قائمة التنقل">
     <a href="index.html">🏠 الواجهة الرئيسية</a>
@@ -144,107 +139,108 @@
   <div class="summary" id="summary">
     <p>الربح الصافي: <span id="profitDisplay">0</span> ل.س</p>
     <p>عدد الأغراض: <span id="totalItems">0</span></p>
-    <p>إجمالي المبيعات: <span id="totalSales">0</span></p>
+    <p>إجمالي المبيعات: <span id="totalSales">0</span> ل.س</p>
   </div>
 
-<script>
-  let products = JSON.parse(localStorage.getItem("products")) || {};
+  <script>
+    let products = JSON.parse(localStorage.getItem("products")) || {};
+    const productSelect = document.getElementById("productSelect");
+    const quantityInput = document.getElementById("quantityInput");
+    const totalPriceInput = document.getElementById("totalPriceInput");
+    const profitDisplay = document.getElementById("profitDisplay");
+    const totalItems = document.getElementById("totalItems");
+    const totalSales = document.getElementById("totalSales");
+    const saveBtn = document.getElementById("saveBtn");
 
-  const productSelect = document.getElementById("productSelect");
-  const quantityInput = document.getElementById("quantityInput");
-  const totalPriceInput = document.getElementById("totalPriceInput");
-  const profitDisplay = document.getElementById("profitDisplay");
-  const totalItems = document.getElementById("totalItems");
-  const totalSales = document.getElementById("totalSales");
-  const saveBtn = document.getElementById("saveBtn");
-  const menuBtn = document.getElementById("menu-btn");
-  const menu = document.getElementById("menu");
-
-  // مفاتيح تخزين اليوم الحالي
-  function getTodayKey(type) {
-    const today = new Date().toISOString().slice(0,10);
-    return `${type}-${today}`;
-  }
-
-  // تحميل المبيعات والربح لليوم الحالي
-  let todaySales = JSON.parse(localStorage.getItem(getTodayKey("sales"))) || [];
-  let todayProfit = parseFloat(localStorage.getItem(getTodayKey("profit"))) || 0;
-
-  // تعبئة المنتجات في القائمة المنسدلة
-  function populateProducts() {
-    productSelect.innerHTML = '<option value="" disabled selected>اختر المنتج</option>';
-    for (const name in products) {
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      productSelect.appendChild(option);
+    function getTodayKey(type) {
+      const today = new Date().toISOString().slice(0,10);
+      return `${type}-${today}`;
     }
-  }
 
-  // تحديث ملخص المبيعات
-  function updateSummary() {
-    const totalQuantity = todaySales.reduce((acc, item) => acc + item.quantity, 0);
-    const totalSaleValue = todaySales.reduce((acc, item) => acc + item.sellPrice, 0);
-    profitDisplay.textContent = todayProfit.toFixed(0);
-    totalItems.textContent = totalQuantity;
-    totalSales.textContent = totalSaleValue.toFixed(0);
-  }
+    let todaySales = JSON.parse(localStorage.getItem(getTodayKey("sales"))) || [];
+    let todayProfit = parseFloat(localStorage.getItem(getTodayKey("profit"))) || 0;
 
-  // حساب الربح من السعر الكلي والكمية
-  function calculateProfit(productName, quantity, totalSellPrice) {
-    if (!products[productName]) return 0;
-    const costPrice = products[productName].cost * quantity;
-    return totalSellPrice - costPrice;
-  }
+    function populateProducts() {
+      productSelect.innerHTML = '<option value="" disabled selected>اختر المنتج</option>';
+      for (const name in products) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        productSelect.appendChild(option);
+      }
+    }
 
-  // تحديث الربح عند تغيير المدخلات
-  function onInputChange() {
-    const prod = productSelect.value;
-    const qty = parseInt(quantityInput.value) || 0;
-    const sellPrice = parseFloat(totalPriceInput.value) || 0;
-    if (prod && qty > 0 && sellPrice > 0) {
-      const profit = calculateProfit(prod, qty, sellPrice);
-      profitDisplay.textContent = profit.toFixed(0);
-    } else {
+    function updateSummary() {
+      const totalQuantity = todaySales.reduce((acc, item) => acc + item.quantity, 0);
+      const totalSaleValue = todaySales.reduce((acc, item) => acc + item.sellPrice, 0);
+      profitDisplay.textContent = todayProfit.toFixed(0);
+      totalItems.textContent = totalQuantity;
+      totalSales.textContent = totalSaleValue.toFixed(0);
+    }
+
+    function calculateProfit(productName, quantity, totalSellPrice) {
+      if (!products[productName]) return 0;
+      const costPrice = products[productName].cost * quantity;
+      return totalSellPrice - costPrice;
+    }
+
+    function onInputChange() {
+      const prod = productSelect.value;
+      const qty = parseInt(quantityInput.value) || 0;
+      const sellPrice = parseFloat(totalPriceInput.value) || 0;
+      if (prod && qty > 0 && sellPrice > 0) {
+        const profit = calculateProfit(prod, qty, sellPrice);
+        profitDisplay.textContent = profit.toFixed(0);
+      } else {
+        profitDisplay.textContent = "0";
+      }
+    }
+
+    function saveSale() {
+      const prod = productSelect.value;
+      const qty = parseInt(quantityInput.value);
+      const sellPrice = parseFloat(totalPriceInput.value);
+      if (!prod || qty <= 0 || sellPrice <= 0) {
+        alert("يرجى إدخال البيانات بشكل صحيح");
+        return;
+      }
+
+      const costPrice = products[prod].cost * qty;
+      const profit = sellPrice - costPrice;
+
+      todaySales.push({
+        product: prod,
+        quantity: qty,
+        sellPrice: sellPrice,
+        costPrice: products[prod].cost,
+        time: new Date().toLocaleTimeString()
+      });
+
+      todayProfit += profit;
+
+      localStorage.setItem(getTodayKey("sales"), JSON.stringify(todaySales));
+      localStorage.setItem(getTodayKey("profit"), todayProfit.toString());
+
+      updateSummary();
+
+      productSelect.value = "";
+      quantityInput.value = 1;
+      totalPriceInput.value = "";
       profitDisplay.textContent = "0";
     }
-  }
 
-  // حفظ عملية البيع
-  function saveSale() {
-    const prod = productSelect.value;
-    const qty = parseInt(quantityInput.value);
-    const sellPrice = parseFloat(totalPriceInput.value);
-    if (!prod || qty <= 0 || sellPrice <= 0) {
-      alert("يرجى إدخال البيانات بشكل صحيح");
-      return;
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
     }
 
-    const costPrice = products[prod].cost * qty;
-    const profit = sellPrice - costPrice;
+    saveBtn.addEventListener("click", saveSale);
+    productSelect.addEventListener("change", onInputChange);
+    quantityInput.addEventListener("input", onInputChange);
+    totalPriceInput.addEventListener("input", onInputChange);
 
-    todaySales.push({
-      product: prod,
-      quantity: qty,
-      sellPrice: sellPrice,
-      costPrice: products[prod].cost,
-      time: new Date().toLocaleTimeString()
-    });
-
-    todayProfit += profit;
-
-    localStorage.setItem(getTodayKey("sales"), JSON.stringify(todaySales));
-    localStorage.setItem(getTodayKey("profit"), todayProfit.toString());
-
+    populateProducts();
     updateSummary();
-
-    productSelect.value = "";
-    quantityInput.value = 1;
-    totalPriceInput.value = "";
-    profitDisplay.textContent = "0";
-  }
-
-  // تبديل عرض القائمة
-  function toggleMenu() {
-    const menu = document.getElementById("menu");
-    menu.style.display = (menu.style.display ===
+  </script>
+</body>
+</html>
