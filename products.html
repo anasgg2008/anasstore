@@ -94,7 +94,7 @@
       background-color: #b30000;
     }
 
-    /* زر الثلاث نقاط المعدل */
+    /* زر الثلاث نقاط بدون صندوق وشفاف */
     #menuBtn {
       font-size: 28px;
       background: none;
@@ -104,7 +104,9 @@
       padding: 5px 10px;
       position: fixed;
       top: 10px;
-      left: 10px;
+      right: 10px; /* ثابت على يمين الشاشة */
+      box-shadow: none;
+      outline: none;
       user-select: none;
       z-index: 1000;
     }
@@ -114,7 +116,7 @@
       display: none;
       position: fixed;
       top: 50px;
-      left: 10px;
+      right: 10px;
       background-color: #222;
       border-radius: 10px;
       box-shadow: 0 0 10px #000;
@@ -178,7 +180,6 @@
     const productCostInput = document.getElementById("productCost");
     const productsTableBody = document.querySelector("#productsTable tbody");
 
-    // المنتجات مخزنة في localStorage ككائن
     let products = JSON.parse(localStorage.getItem("products")) || {};
 
     function updateTable() {
@@ -240,7 +241,6 @@
 
     updateTable();
 
-    // قائمة التنقل
     const menuBtn = document.getElementById("menuBtn");
     const dropdownMenu = document.getElementById("dropdownMenu");
     const closeMenuLink = document.getElementById("closeMenu");
