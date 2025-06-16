@@ -243,12 +243,17 @@
     const dropdownMenu = document.getElementById("dropdownMenu");
     const closeMenuLink = document.getElementById("closeMenu");
 
-    menuBtn.addEventListener("click", () => {
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();  // منع انتقال الحدث لأعلى DOM
       if (dropdownMenu.style.display === "block") {
         dropdownMenu.style.display = "none";
       } else {
         dropdownMenu.style.display = "block";
       }
+    });
+
+    dropdownMenu.addEventListener("click", (e) => {
+      e.stopPropagation();  // منع إغلاق القائمة عند الضغط بداخلها
     });
 
     closeMenuLink.addEventListener("click", (e) => {
@@ -257,10 +262,8 @@
     });
 
     // إغلاق القائمة لو ضغطت خارجها
-    document.addEventListener("click", (e) => {
-      if (!dropdownMenu.contains(e.target) && e.target !== menuBtn) {
-        dropdownMenu.style.display = "none";
-      }
+    document.addEventListener("click", () => {
+      dropdownMenu.style.display = "none";
     });
   </script>
 
