@@ -1,255 +1,276 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>إضافة وتعديل المنتجات</title>
+  <style>
+    body {
+      background-color: #111;
+      color: white;
+      font-family: sans-serif;
+      padding: 20px;
+      min-height: 100vh;
+      direction: rtl;
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+      position: relative;
+    }
+    form {
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+      background-color: #222;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px #444;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: none;
+      background-color: #333;
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: red;
+      border: none;
+      color: white;
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 15px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 0 10px red;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #b30000;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background-color: #222;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+      font-size: 16px;
+    }
+    th {
+      background-color: #333;
+    }
+    tr:hover {
+      background-color: #333;
+    }
+    .delete-btn {
+      background-color: #800000;
+      border: none;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .delete-btn:hover {
+      background-color: #b30000;
+    }
 
-<html lang="ar" dir="rtl">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>إضافة وتعديل المنتجات</title>  
-  <style>  
-    body {  
-      background-color: #111;  
-      color: white;  
-      font-family: sans-serif;  
-      padding: 20px;  
-      min-height: 100vh;  
-      direction: rtl;  
-      position: relative;  
-    }  
-    h1 {  
-      text-align: center;  
-      margin-bottom: 20px;  
-      font-size: 28px;  
-      position: relative;  
-    }  
-    form {  
-      max-width: 400px;  
-      margin: 0 auto 30px auto;  
-      background-color: #222;  
-      padding: 20px;  
-      border-radius: 15px;  
-      box-shadow: 0 0 10px #444;  
-    }  
-    label {  
-      display: block;  
-      margin-bottom: 8px;  
-      font-weight: bold;  
-    }  
-    input[type="text"],  
-    input[type="number"] {  
-      width: 100%;  
-      padding: 8px;  
-      margin-bottom: 15px;  
-      border-radius: 8px;  
-      border: none;  
-      background-color: #333;  
-      color: white;  
-      font-size: 16px;  
-      box-sizing: border-box;  
-    }  
-    button {  
-      background-color: red;  
-      border: none;  
-      color: white;  
-      padding: 12px 20px;  
-      font-size: 18px;  
-      border-radius: 15px;  
-      cursor: pointer;  
-      width: 100%;  
-      box-shadow: 0 0 10px red;  
-      transition: background-color 0.3s;  
-    }  
-    button:hover {  
-      background-color: #b30000;  
-    }  
-    table {  
-      width: 100%;  
-      border-collapse: collapse;  
-      margin-top: 30px;  
-      background-color: #222;  
-      border-radius: 15px;  
-      overflow: hidden;  
-    }  
-    th, td {  
-      padding: 12px;  
-      text-align: center;  
-      border-bottom: 1px solid #444;  
-      font-size: 16px;  
-    }  
-    th {  
-      background-color: #333;  
-    }  
-    tr:hover {  
-      background-color: #333;  
-    }  
-    .delete-btn {  
-      background-color: #800000;  
-      border: none;  
-      color: white;  
-      padding: 6px 10px;  
-      border-radius: 8px;  
-      cursor: pointer;  
-      font-size: 14px;  
-      transition: background-color 0.3s;  
-    }  
-    .delete-btn:hover {  
-      background-color: #b30000;  
-    }  
-    /* زر الثلاث نقاط */  
-    #menuBtn {font-size: 28px;
+    /* زر الثلاث نقاط المعدل */
+    #menuBtn {
+      font-size: 28px;
       background: none;
       border: none;
       color: white;
       cursor: pointer;
-      padding: 5px 10px;  
-    }  
-    /* قائمة التنقل المنسدلة */  
-    #dropdownMenu {  
-      display: none;  
-      position: fixed;  
-      top: 60px;  
-      left: 20px;  
-      background-color: #222;  
-      border-radius: 10px;  
-      box-shadow: 0 0 10px #000;  
-      width: 180px;  
-      z-index: 999;  
-      user-select: none;  
-    }  
-    #dropdownMenu a {  
-      display: block;  
-      color: white;  
-      padding: 12px 15px;  
-      text-decoration: none;  
-      border-bottom: 1px solid #444;  
-      font-size: 16px;  
-      transition: background-color 0.2s;  
-    }  
-    #dropdownMenu a:last-child {  
-      border-bottom: none;  
-    }  
-    #dropdownMenu a:hover {  
-      background-color: #444;  
-    }  
-  </style>  
-</head>  
-<body>  <button id="menuBtn">⋮</button>
+      padding: 5px 10px;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      user-select: none;
+      z-index: 1000;
+    }
 
-  <div id="dropdownMenu">  
-    <a href="index.html">الصفحة الرئيسية</a>  
-    <a href="sales.html">سجل المبيعات</a>  
-    <a href="#" id="closeMenu">إغلاق القائمة</a>  
-  </div>    <h1>إضافة وتعديل المنتجات</h1>    <form id="productForm">  
-    <label for="productName">اسم المنتج</label>  
-    <input type="text" id="productName" placeholder="مثلاً: جرابات" required />  <label for="productCost">سعر الشراء الأساسي (ل.س)</label>  
-<input type="number" id="productCost" min="1" placeholder="مثلاً: 1000" required />  
+    /* قائمة التنقل المنسدلة */
+    #dropdownMenu {
+      display: none;
+      position: fixed;
+      top: 50px;
+      left: 10px;
+      background-color: #222;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+      width: 180px;
+      z-index: 999;
+      user-select: none;
+    }
+    #dropdownMenu a {
+      display: block;
+      color: white;
+      padding: 12px 15px;
+      text-decoration: none;
+      border-bottom: 1px solid #444;
+      font-size: 16px;
+      transition: background-color 0.2s;
+    }
+    #dropdownMenu a:last-child {
+      border-bottom: none;
+    }
+    #dropdownMenu a:hover {
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
 
-<button type="submit">أضف / حدّث المنتج</button>
+  <button id="menuBtn" aria-label="القائمة">⋮</button>
 
-  </form>    <table id="productsTable">  
-    <thead>  
-      <tr>  
-        <th>اسم المنتج</th>  
-        <th>سعر الشراء الأساسي</th>  
-        <th>حذف</th>  
-      </tr>  
-    </thead>  
-    <tbody>  
-      <!-- المنتجات تظهر هنا -->  
-    </tbody>  
-  </table>    <script>  
-    const productForm = document.getElementById("productForm");  
-    const productNameInput = document.getElementById("productName");  
-    const productCostInput = document.getElementById("productCost");  
-    const productsTableBody = document.querySelector("#productsTable tbody");  
-  
-    // المنتجات مخزنة في localStorage ككائن  
-    let products = JSON.parse(localStorage.getItem("products")) || {};  
-  
-    function updateTable() {  
-      productsTableBody.innerHTML = "";  
-      for (let name in products) {  
-        const tr = document.createElement("tr");  
-  
-        const tdName = document.createElement("td");  
-        tdName.textContent = name;  
-        tr.appendChild(tdName);  
-  
-        const tdCost = document.createElement("td");  
-        tdCost.textContent = products[name].cost;  
-        tr.appendChild(tdCost);  
-  
-        const tdDelete = document.createElement("td");  
-        const btnDelete = document.createElement("button");  
-        btnDelete.textContent = "حذف";  
-        btnDelete.className = "delete-btn";  
-        btnDelete.onclick = () => {  
-          if(confirm(`هل تريد حذف المنتج "${name}"؟`)){  
-            delete products[name];  
-            saveProducts();  
-            updateTable();  
-          }  
-        };  
-        tdDelete.appendChild(btnDelete);  
-        tr.appendChild(tdDelete);  
-  
-        productsTableBody.appendChild(tr);  
-      }  
-    }  
-  
-    function saveProducts() {  
-      localStorage.setItem("products", JSON.stringify(products));  
-    }  
-  
-    productForm.addEventListener("submit", (e) => {  
-      e.preventDefault();  
-  
-      const name = productNameInput.value.trim();  
-      const cost = parseFloat(productCostInput.value);  
-  
-      if (!name) {  
-        alert("يرجى إدخال اسم المنتج");  
-        return;  
-      }  
-      if (!cost || cost <= 0) {  
-        alert("يرجى إدخال سعر شراء صحيح أكبر من صفر");  
-        return;  
-      }  
-  
-      products[name] = { cost };  
-      saveProducts();  
-      updateTable();  
-  
-      productForm.reset();  
-    });  
-  
-    updateTable();  
-  
-    // قائمة التنقل  
-    const menuBtn = document.getElementById("menuBtn");  
-    const dropdownMenu = document.getElementById("dropdownMenu");  
-    const closeMenuLink = document.getElementById("closeMenu");  
-  
-    menuBtn.addEventListener("click", (e) => {  
-      e.stopPropagation();  // منع انتقال الحدث لأعلى DOM  
-      if (dropdownMenu.style.display === "block") {  
-        dropdownMenu.style.display = "none";  
-      } else {  
-        dropdownMenu.style.display = "block";  
-      }  
-    });  
-  
-    dropdownMenu.addEventListener("click", (e) => {  
-      e.stopPropagation();  // منع إغلاق القائمة عند الضغط بداخلها  
-    });  
-  
-    closeMenuLink.addEventListener("click", (e) => {  
-      e.preventDefault();  
-      dropdownMenu.style.display = "none";  
-    });  
-  
-    // إغلاق القائمة لو ضغطت خارجها  
-    document.addEventListener("click", () => {  
-      dropdownMenu.style.display = "none";  
-    });  
-  </script>  </body>  
-</html>  
+  <div id="dropdownMenu" role="menu" aria-hidden="true">
+    <a href="index.html" role="menuitem">الصفحة الرئيسية</a>
+    <a href="sales.html" role="menuitem">سجل المبيعات</a>
+    <a href="#" id="closeMenu" role="menuitem">إغلاق القائمة</a>
+  </div>
+
+  <h1>إضافة وتعديل المنتجات</h1>
+
+  <form id="productForm">
+    <label for="productName">اسم المنتج</label>
+    <input type="text" id="productName" placeholder="مثلاً: جرابات" required />
+    <label for="productCost">سعر الشراء الأساسي (ل.س)</label>
+    <input type="number" id="productCost" min="1" placeholder="مثلاً: 1000" required />
+    <button type="submit">أضف / حدّث المنتج</button>
+  </form>
+
+  <table id="productsTable">
+    <thead>
+      <tr>
+        <th>اسم المنتج</th>
+        <th>سعر الشراء الأساسي</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- المنتجات تظهر هنا -->
+    </tbody>
+  </table>
+
+  <script>
+    const productForm = document.getElementById("productForm");
+    const productNameInput = document.getElementById("productName");
+    const productCostInput = document.getElementById("productCost");
+    const productsTableBody = document.querySelector("#productsTable tbody");
+
+    // المنتجات مخزنة في localStorage ككائن
+    let products = JSON.parse(localStorage.getItem("products")) || {};
+
+    function updateTable() {
+      productsTableBody.innerHTML = "";
+      for (let name in products) {
+        const tr = document.createElement("tr");
+
+        const tdName = document.createElement("td");
+        tdName.textContent = name;
+        tr.appendChild(tdName);
+
+        const tdCost = document.createElement("td");
+        tdCost.textContent = products[name].cost;
+        tr.appendChild(tdCost);
+
+        const tdDelete = document.createElement("td");
+        const btnDelete = document.createElement("button");
+        btnDelete.textContent = "حذف";
+        btnDelete.className = "delete-btn";
+        btnDelete.onclick = () => {
+          if (confirm(`هل تريد حذف المنتج "${name}"؟`)) {
+            delete products[name];
+            saveProducts();
+            updateTable();
+          }
+        };
+        tdDelete.appendChild(btnDelete);
+        tr.appendChild(tdDelete);
+
+        productsTableBody.appendChild(tr);
+      }
+    }
+
+    function saveProducts() {
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+
+    productForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const name = productNameInput.value.trim();
+      const cost = parseFloat(productCostInput.value);
+
+      if (!name) {
+        alert("يرجى إدخال اسم المنتج");
+        return;
+      }
+      if (!cost || cost <= 0) {
+        alert("يرجى إدخال سعر شراء صحيح أكبر من صفر");
+        return;
+      }
+
+      products[name] = { cost };
+      saveProducts();
+      updateTable();
+
+      productForm.reset();
+    });
+
+    updateTable();
+
+    // قائمة التنقل
+    const menuBtn = document.getElementById("menuBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const closeMenuLink = document.getElementById("closeMenu");
+
+    menuBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (dropdownMenu.style.display === "block") {
+        dropdownMenu.style.display = "none";
+        dropdownMenu.setAttribute('aria-hidden', 'true');
+      } else {
+        dropdownMenu.style.display = "block";
+        dropdownMenu.setAttribute('aria-hidden', 'false');
+      }
+    });
+
+    dropdownMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+
+    closeMenuLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      dropdownMenu.style.display = "none";
+      dropdownMenu.setAttribute('aria-hidden', 'true');
+    });
+
+    document.addEventListener("click", () => {
+      dropdownMenu.style.display = "none";
+      dropdownMenu.setAttribute('aria-hidden', 'true');
+    });
+  </script>
+
+</body>
+</html>
