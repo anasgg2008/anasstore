@@ -11,6 +11,8 @@
       font-family: sans-serif;
       padding: 20px;
       direction: rtl;
+      position: relative;
+      min-height: 100vh;
     }
     h1 {
       text-align: center;
@@ -69,11 +71,13 @@
     #menu-btn {
       position: absolute;
       top: 10px;
-      right: 10px;
+      left: 10px; /* عشان يمين-يسار حسب RTL ممكن تحط left بدل right */
       font-size: 24px;
       background: none;
       border: none;
       color: white;
+      cursor: pointer;
+      z-index: 1000;
     }
     #menu {
       display: none;
@@ -82,8 +86,10 @@
       padding: 10px;
       position: absolute;
       top: 40px;
-      right: 10px;
-      z-index: 999;
+      left: 10px;
+      z-index: 9999;
+      border-radius: 10px;
+      min-width: 150px;
     }
     #menu a, #menu button {
       display: block;
@@ -94,6 +100,13 @@
       border: none;
       text-align: right;
       cursor: pointer;
+      font-size: 16px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+    #menu a:hover, #menu button:hover {
+      background-color: #444;
     }
   </style>
 </head>
@@ -101,7 +114,7 @@
 
   <!-- قائمة النقاط الثلاث -->
   <button id="menu-btn" onclick="toggleMenu()">⋮</button>
-  <div id="menu">
+  <div id="menu" aria-label="قائمة التنقل">
     <a href="index.html">🏠 الواجهة الرئيسية</a>
     <a href="products.html">➕ إضافة منتج</a>
     <a href="sales.html">📊 سجل المبيعات</a>
@@ -131,13 +144,12 @@
   <div class="summary" id="summary">
     <p>الربح الصافي: <span id="profitDisplay">0</span> ل.س</p>
     <p>عدد الأغراض: <span id="totalItems">0</span></p>
-    <p>إجمالي المبيعات: <span id="totalSales">0</span> ل.س</p>
+    <p>إجمالي المبيعات: <span id="totalSales">0</span></p>
   </div>
 
 <script>
-  // المنتجات من localStorage
   let products = JSON.parse(localStorage.getItem("products")) || {};
-  
+
   const productSelect = document.getElementById("productSelect");
   const quantityInput = document.getElementById("quantityInput");
   const totalPriceInput = document.getElementById("totalPriceInput");
@@ -145,16 +157,22 @@
   const totalItems = document.getElementById("totalItems");
   const totalSales = document.getElementById("totalSales");
   const saveBtn = document.getElementById("saveBtn");
+  const menuBtn = document.getElementById("menu-btn");
+  const menu = document.getElementById("menu");
 
-  let todaySales = JSON.parse(localStorage.getItem(getTodayKey("sales"))) || [];
-  let todayProfit = parseFloat(localStorage.getItem(getTodayKey("profit"))) || 0;
-
+  // مفاتيح تخزين اليوم الحالي
   function getTodayKey(type) {
     const today = new Date().toISOString().slice(0,10);
     return `${type}-${today}`;
   }
 
+  // تحميل المبيعات والربح لليوم الحالي
+  let todaySales = JSON.parse(localStorage.getItem(getTodayKey("sales"))) || [];
+  let todayProfit = parseFloat(localStorage.getItem(getTodayKey("profit"))) || 0;
+
+  // تعبئة المنتجات في القائمة المنسدلة
   function populateProducts() {
+    productSelect.innerHTML = '<option value="" disabled selected>اختر المنتج</option>';
     for (const name in products) {
       const option = document.createElement("option");
       option.value = name;
@@ -163,32 +181,36 @@
     }
   }
 
+  // تحديث ملخص المبيعات
   function updateSummary() {
-    let totalQuantity = todaySales.reduce((acc, item) => acc + item.quantity, 0);
-    let totalSaleValue = todaySales.reduce((acc, item) => acc + item.sellPrice, 0);
+    const totalQuantity = todaySales.reduce((acc, item) => acc + item.quantity, 0);
+    const totalSaleValue = todaySales.reduce((acc, item) => acc + item.sellPrice, 0);
     profitDisplay.textContent = todayProfit.toFixed(0);
     totalItems.textContent = totalQuantity;
     totalSales.textContent = totalSaleValue.toFixed(0);
   }
 
+  // حساب الربح من السعر الكلي والكمية
   function calculateProfit(productName, quantity, totalSellPrice) {
     if (!products[productName]) return 0;
-    let costPrice = products[productName].cost * quantity;
+    const costPrice = products[productName].cost * quantity;
     return totalSellPrice - costPrice;
   }
 
+  // تحديث الربح عند تغيير المدخلات
   function onInputChange() {
     const prod = productSelect.value;
     const qty = parseInt(quantityInput.value) || 0;
     const sellPrice = parseFloat(totalPriceInput.value) || 0;
     if (prod && qty > 0 && sellPrice > 0) {
-      let profit = calculateProfit(prod, qty, sellPrice);
+      const profit = calculateProfit(prod, qty, sellPrice);
       profitDisplay.textContent = profit.toFixed(0);
     } else {
       profitDisplay.textContent = "0";
     }
   }
 
+  // حفظ عملية البيع
   function saveSale() {
     const prod = productSelect.value;
     const qty = parseInt(quantityInput.value);
@@ -205,7 +227,8 @@
       product: prod,
       quantity: qty,
       sellPrice: sellPrice,
-      costPrice: products[prod].cost
+      costPrice: products[prod].cost,
+      time: new Date().toLocaleTimeString()
     });
 
     todayProfit += profit;
@@ -221,20 +244,7 @@
     profitDisplay.textContent = "0";
   }
 
-  productSelect.addEventListener("change", onInputChange);
-  quantityInput.addEventListener("input", onInputChange);
-  totalPriceInput.addEventListener("input", onInputChange);
-  saveBtn.addEventListener("click", saveSale);
-
-  populateProducts();
-  updateSummary();
-
-  // قائمة النقاط الثلاث
+  // تبديل عرض القائمة
   function toggleMenu() {
     const menu = document.getElementById("menu");
-    menu.style.display = (menu.style.display === "block") ? "none" : "block";
-  }
-</script>
-
-</body>
-</html>
+    menu.style.display = (menu.style.display ===
