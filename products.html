@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>إضافة وتعديل المنتجات</title>
+  <title>صفحة تعديل المنتجات</title>
   <style>
     body {
       background-color: #111;
       color: white;
       font-family: sans-serif;
       padding: 20px;
-      min-height: 2000px; /* حتى تشوف تأثير التمرير */
+      min-height: 100vh;
       direction: rtl;
-      position: relative; /* مهم لـ position: absolute للزر */
+      position: relative;
     }
     h1 {
       text-align: center;
@@ -45,7 +45,7 @@
       font-size: 16px;
       box-sizing: border-box;
     }
-    button[type="submit"] {
+    button {
       background-color: red;
       border: none;
       color: white;
@@ -57,7 +57,7 @@
       box-shadow: 0 0 10px red;
       transition: background-color 0.3s;
     }
-    button[type="submit"]:hover {
+    button:hover {
       background-color: #b30000;
     }
     table {
@@ -93,7 +93,8 @@
     .delete-btn:hover {
       background-color: #b30000;
     }
-    /* زر الثلاث نقاط ثابت بالنسبة للصفحة، بدون صندوق */
+
+    /* زر الثلاث نقاط حسب طلبك */
     #menuBtn {
       font-size: 28px;
       background: none;
@@ -101,25 +102,26 @@
       color: white;
       cursor: pointer;
       padding: 5px 10px;
-      position: absolute;
+      position: fixed;
       top: 10px;
-      left: 10px; /* على اليسار */
+      right: 10px;
       box-shadow: none;
       outline: none;
       user-select: none;
       z-index: 1000;
     }
+
     /* قائمة التنقل المنسدلة */
     #dropdownMenu {
       display: none;
       position: fixed;
-      top: 60px;
-      left: 20px;
+      top: 50px;
+      right: 10px;
       background-color: #222;
       border-radius: 10px;
       box-shadow: 0 0 10px #000;
       width: 180px;
-      z-index: 999;
+      z-index: 9999;
       user-select: none;
     }
     #dropdownMenu a {
@@ -140,7 +142,7 @@
   </style>
 </head>
 <body>
-  <button id="menuBtn" aria-label="القائمة">⋮</button>
+  <button id="menuBtn">⋮</button>
 
   <div id="dropdownMenu">
     <a href="index.html">الصفحة الرئيسية</a>
@@ -177,7 +179,6 @@
     const productCostInput = document.getElementById("productCost");
     const productsTableBody = document.querySelector("#productsTable tbody");
 
-    // المنتجات مخزنة في localStorage ككائن
     let products = JSON.parse(localStorage.getItem("products")) || {};
 
     function updateTable() {
@@ -198,7 +199,7 @@
         btnDelete.textContent = "حذف";
         btnDelete.className = "delete-btn";
         btnDelete.onclick = () => {
-          if (confirm(`هل تريد حذف المنتج "${name}"؟`)) {
+          if(confirm(`هل تريد حذف المنتج "${name}"؟`)){
             delete products[name];
             saveProducts();
             updateTable();
@@ -239,13 +240,12 @@
 
     updateTable();
 
-    // قائمة التنقل
     const menuBtn = document.getElementById("menuBtn");
     const dropdownMenu = document.getElementById("dropdownMenu");
     const closeMenuLink = document.getElementById("closeMenu");
 
     menuBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // منع انتقال الحدث لأعلى DOM
+      e.stopPropagation();
       if (dropdownMenu.style.display === "block") {
         dropdownMenu.style.display = "none";
       } else {
@@ -254,7 +254,7 @@
     });
 
     dropdownMenu.addEventListener("click", (e) => {
-      e.stopPropagation(); // منع إغلاق القائمة عند الضغط بداخلها
+      e.stopPropagation();
     });
 
     closeMenuLink.addEventListener("click", (e) => {
@@ -262,7 +262,6 @@
       dropdownMenu.style.display = "none";
     });
 
-    // إغلاق القائمة لو ضغطت خارجها
     document.addEventListener("click", () => {
       dropdownMenu.style.display = "none";
     });
