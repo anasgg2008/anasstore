@@ -2,98 +2,28 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>سجل المبيعات اليومية</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📊 سجل المبيعات اليومية</title>
   <style>
     body {
       background-color: #111;
       color: white;
       font-family: sans-serif;
       padding: 20px;
-      min-height: 100vh;
       direction: rtl;
-      position: relative;
     }
-    h1 {
-      text-align: center;
+    .top-bar {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin-bottom: 15px;
     }
-    .day {
-      border-radius: 12px;
-      background-color: #222;
-      margin-bottom: 25px;
-      padding: 15px 20px;
-      box-shadow: 0 0 15px #000;
-    }
-    .day-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .day-header h3 {
+    h1 {
       margin: 0;
-    }
-    .day-summary {
-      color: #aaa;
-      margin-bottom: 10px;
-    }
-    .products-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .product-box {
-      flex: 1 1 220px;
-      background-color: #333;
-      border-radius: 10px;
-      padding: 12px 15px;
-      box-shadow: 0 0 8px #000;
-      position: relative;
-      color: white;
-    }
-    .product-box.red {
-      background-color: #8b0000;
-    }
-    .product-box.blue {
-      background-color: #004080;
-    }
-    .product-box h4 {
-      margin: 0 0 8px 0;
-      font-size: 18px;
-    }
-    .product-info {
-      font-size: 14px;
-      line-height: 1.4;
-      white-space: pre-line;
-      margin-bottom: 10px;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-start;
-    }
-    button {
-      border: none;
-      padding: 6px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      color: white;
-      transition: background-color 0.3s;
-      user-select: none;
-    }
-    .btn-delete {
-      background-color: crimson;
-    }
-    .btn-delete:hover {
-      background-color: #b30000;
-    }
-    .btn-edit {
-      background-color: #008080;
-    }
-    .btn-edit:hover {
-      background-color: #006666;
+      font-size: 28px;
+      text-align: center;
+      flex-grow: 1;
     }
     #menuBtn {
       position: fixed;
@@ -105,9 +35,9 @@
       color: white;
       cursor: pointer;
       z-index: 1000;
+      padding: 0;
       user-select: none;
       outline: none;
-      padding: 0;
     }
     #dropdownMenu {
       display: none;
@@ -116,25 +46,78 @@
       left: 20px;
       background-color: #222;
       border-radius: 10px;
-      box-shadow: 0 0 10px #000;
       width: 180px;
       z-index: 999;
       user-select: none;
+      box-shadow: 0 0 10px #000;
     }
     #dropdownMenu a {
-      display: block;
       color: white;
       padding: 12px 15px;
+      display: block;
       text-decoration: none;
       border-bottom: 1px solid #444;
-      font-size: 16px;
-      transition: background-color 0.2s;
     }
     #dropdownMenu a:last-child {
       border-bottom: none;
     }
     #dropdownMenu a:hover {
       background-color: #444;
+    }
+    .day {
+      border: 1px solid #444;
+      border-radius: 10px;
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #222;
+    }
+    .day h3 {
+      margin: 0 0 10px 0;
+      font-size: 22px;
+    }
+    .summary {
+      margin-bottom: 10px;
+      color: #aaa;
+      font-size: 16px;
+    }
+    .product-box {
+      background-color: #333;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .product-box:nth-child(odd) {
+      background-color: #551111;
+    }
+    .product-box:nth-child(even) {
+      background-color: #113355;
+    }
+    .product-box p {
+      margin: 4px 0;
+    }
+    .btn {
+      background-color: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px 5px 0 0;
+      transition: background-color 0.3s;
+    }
+    .btn:hover {
+      background-color: #b30000;
+    }
+    .btn-edit {
+      background-color: #007bff;
+    }
+    .btn-edit:hover {
+      background-color: #0056b3;
+    }
+    .actions {
+      margin-top: 8px;
     }
     #exportAllPDFBtn {
       background-color: #0066cc;
@@ -145,194 +128,274 @@
       border-radius: 10px;
       cursor: pointer;
       box-shadow: 0 0 8px #005bb5;
-      margin: 10px auto 30px auto;
+      margin: 15px auto 30px auto;
       display: block;
-      width: max-content;
       transition: background-color 0.3s;
-      user-select: none;
     }
     #exportAllPDFBtn:hover {
       background-color: #004d99;
+    }
+    /* Scrollbar for pre */
+    pre {
+      background-color: #333;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-bottom: 10px;
+    }
+    /* Modal style */
+    #editModal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    #editModal .modal-content {
+      background-color: #222;
+      border-radius: 15px;
+      padding: 20px;
+      max-width: 400px;
+      width: 90%;
+      color: white;
+      position: relative;
+    }
+    #editModal label {
+      display: block;
+      margin-top: 12px;
+      font-size: 16px;
+    }
+    #editModal input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+      background-color: #333;
+      color: white;
+      font-size: 16px;
+    }
+    #editModal button {
+      margin-top: 20px;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #editModal button.save-btn {
+      background-color: #28a745;
+      color: white;
+    }
+    #editModal button.save-btn:hover {
+      background-color: #1e7e34;
+    }
+    #editModal button.cancel-btn {
+      background-color: crimson;
+      color: white;
+      margin-left: 10px;
+    }
+    #editModal button.cancel-btn:hover {
+      background-color: #b30000;
+    }
+    #editModal .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      cursor: pointer;
+      user-select: none;
+      color: white;
     }
   </style>
 </head>
 <body>
 
-  <button id="menuBtn">⋮</button>
-  <div id="dropdownMenu">
-    <a href="index.html">الصفحة الرئيسية</a>
-    <a href="products.html">إضافة منتجات</a>
-    <a href="#" id="closeMenu">إغلاق القائمة</a>
+<button id="menuBtn">⋮</button>
+<div id="dropdownMenu">
+  <a href="index.html">🏠 الصفحة الرئيسية</a>
+  <a href="products.html">➕ إضافة منتجات</a>
+  <a href="sales.html">📊 سجل المبيعات</a>
+</div>
+
+<div class="top-bar">
+  <h1>📊 سجل المبيعات اليومية</h1>
+</div>
+
+<div id="sales"></div>
+
+<button id="exportAllPDFBtn">⬇️ تصدير جميع الأيام PDF</button>
+
+<!-- تعديل المودال -->
+<div id="editModal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeEditModal">&times;</span>
+    <h2>تعديل المنتج</h2>
+    <form id="editForm">
+      <label for="editProductName">اسم المنتج</label>
+      <input type="text" id="editProductName" required autocomplete="off" disabled />
+
+      <label for="editQuantity">الكمية</label>
+      <input type="number" id="editQuantity" min="1" required />
+
+      <label for="editSellPrice">سعر البيع</label>
+      <input type="number" id="editSellPrice" min="0" step="any" required />
+
+      <label for="editProfit">الربح</label>
+      <input type="number" id="editProfit" min="0" step="any" required />
+
+      <button type="submit" class="save-btn">حفظ التعديل</button>
+      <button type="button" class="cancel-btn" id="cancelEditBtn">إلغاء</button>
+    </form>
   </div>
+</div>
 
-  <h1>📅 سجل المبيعات اليومية</h1>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  const { jsPDF } = window.jspdf;
 
-  <button id="exportAllPDFBtn">⬇️ تصدير كل الأيام كملف PDF</button>
+  const menuBtn = document.getElementById("menuBtn");
+  const dropdownMenu = document.getElementById("dropdownMenu");
+  menuBtn.onclick = () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
+  };
+  window.onclick = (e) => {
+    if (!menuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+      dropdownMenu.style.display = "none";
+    }
+  };
 
-  <div id="salesContainer"></div>
+  const salesDiv = document.getElementById("sales");
+  const exportAllPDFBtn = document.getElementById("exportAllPDFBtn");
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  let salesData = [];
 
-  <script>
-    const { jsPDF } = window.jspdf;
-    const salesContainer = document.getElementById("salesContainer");
-    const exportAllPDFBtn = document.getElementById("exportAllPDFBtn");
+  function loadSales() {
+    salesData = [];
+    salesDiv.innerHTML = "";
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("sales-")) {
+        const day = key.replace("sales-", "");
+        const data = JSON.parse(localStorage.getItem(key));
+        salesData.push({ day, data });
+      }
+    }
+    salesData.sort((a, b) => b.day.localeCompare(a.day));
+  }
 
-    let salesData = [];
+  function renderSales() {
+    salesDiv.innerHTML = "";
+    salesData.forEach(({ day, data }) => {
+      const container = document.createElement("div");
+      container.className = "day";
 
-    // تحميل البيانات من localStorage
-    function loadSales() {
-      salesData = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith("sales-")) {
-          const day = key.replace("sales-", "");
-          const data = JSON.parse(localStorage.getItem(key));
-          salesData.push({ day, data });
+      let totalProfit = 0;
+      let totalSales = 0;
+
+      const dayTitle = document.createElement("h3");
+      dayTitle.textContent = `📆 ${day}`;
+
+      const summary = document.createElement("div");
+      summary.className = "summary";
+
+      const productsContainer = document.createElement("div");
+
+      data.forEach((item, index) => {
+        const profit = parseFloat(item.profit ?? (item.sellPrice - (item.costPrice * item.quantity)));
+        totalProfit += profit;
+        totalSales += 1;
+
+        const productBox = document.createElement("div");
+        productBox.className = "product-box";
+        productBox.style.backgroundColor = index % 2 === 0 ? "#551111" : "#113355";
+
+        productBox.innerHTML = `
+          <p>📦 المنتج: ${item.product}</p>
+          <p>🔢 الكمية: ${item.quantity}</p>
+          <p>💰 السعر الإجمالي: ${item.sellPrice} ل.س</p>
+          <p>💵 الربح: ${profit.toFixed(0)} ل.س</p>
+          <p>🕒 الوقت: ${item.time}</p>
+          <div class="actions">
+            <button class="btn btn-edit" data-day="${day}" data-index="${index}">✏️ تعديل</button>
+            <button class="btn btn-delete" data-day="${day}" data-index="${index}">🗑️ حذف</button>
+          </div>
+        `;
+
+        productsContainer.appendChild(productBox);
+      });
+
+      summary.textContent = `عدد المبيعات: ${totalSales} — الربح الكلي: ${totalProfit.toFixed(0)} ل.س`;
+
+      const deleteDayBtn = document.createElement("button");
+      deleteDayBtn.textContent = "🗑️ حذف هذا اليوم";
+      deleteDayBtn.className = "btn";
+      deleteDayBtn.style.backgroundColor = "crimson";
+      deleteDayBtn.onclick = () => deleteDay(day);
+
+      const exportPDFBtn = document.createElement("button");
+      exportPDFBtn.textContent = "⬇️ تصدير PDF لهذا اليوم";
+      exportPDFBtn.className = "btn";
+      exportPDFBtn.style.backgroundColor = "#0066cc";
+      exportPDFBtn.onclick = () => exportDayPDF(day, data);
+
+      container.appendChild(deleteDayBtn);
+      container.appendChild(dayTitle);
+      container.appendChild(summary);
+      container.appendChild(productsContainer);
+      container.appendChild(exportPDFBtn);
+
+      salesDiv.appendChild(container);
+    });
+
+    attachProductButtons();
+  }
+
+  function attachProductButtons() {
+    const editButtons = document.querySelectorAll(".btn-edit");
+    const deleteButtons = document.querySelectorAll(".btn-delete");
+
+    editButtons.forEach(btn => {
+      btn.onclick = () => openEditModal(btn.dataset.day, btn.dataset.index);
+    });
+
+    deleteButtons.forEach(btn => {
+      btn.onclick = () => {
+        const day = btn.dataset.day;
+        const index = parseInt(btn.dataset.index, 10);
+        if (confirm("هل أنت متأكد أنك تريد حذف هذا المنتج؟")) {
+          const dayData = salesData.find(d => d.day === day);
+          if (!dayData) return;
+          dayData.data.splice(index, 1);
+          if (dayData.data.length === 0) {
+            localStorage.removeItem("sales-" + day);
+            salesData = salesData.filter(d => d.day !== day);
+          } else {
+            localStorage.setItem("sales-" + day, JSON.stringify(dayData.data));
+          }
+          renderSales();
         }
-      }
-      // ترتيب من الأحدث للأقدم
-      salesData.sort((a, b) => b.day.localeCompare(a.day));
-    }
+      };
+    });
+  }
 
-    function saveSalesDay(day, data) {
-      localStorage.setItem("sales-" + day, JSON.stringify(data));
-    }
-
-    function deleteDay(day) {
-      if (!confirm(`هل أنت متأكد من حذف كل المبيعات ليوم ${day}؟`)) return;
+  function deleteDay(day) {
+    if (confirm(`هل أنت متأكد أنك تريد حذف المبيعات ليوم ${day}؟`)) {
       localStorage.removeItem("sales-" + day);
-      loadSales();
+      salesData = salesData.filter(d => d.day !== day);
       renderSales();
     }
+  }
 
-    function deleteProduct(day, index) {
-      if (!confirm("هل تريد حذف هذا المنتج؟")) return;
-      let dayData = salesData.find(s => s.day === day).data;
-      dayData.splice(index, 1);
-      saveSalesDay(day, dayData);
-      loadSales();
-      renderSales();
-    }
-
-    function editProduct(day, index) {
-      let dayData = salesData.find(s => s.day === day).data;
-      let item = dayData[index];
-
-      const newQuantity = prompt("تعديل الكمية:", item.quantity);
-      if (newQuantity === null) return;
-
-      let quantityNum = parseInt(newQuantity);
-      if (isNaN(quantityNum) || quantityNum <= 0) {
-        alert("الكمية غير صحيحة");
-        return;
-      }
-
-      const newSellPrice = prompt("تعديل سعر البيع الإجمالي (ل.س):", item.sellPrice);
-      if (newSellPrice === null) return;
-
-      let sellPriceNum = parseFloat(newSellPrice);
-      if (isNaN(sellPriceNum) || sellPriceNum < 0) {
-        alert("سعر البيع غير صحيح");
-        return;
-      }
-
-      item.quantity = quantityNum;
-      item.sellPrice = sellPriceNum;
-
-      // إعادة حساب الربح حسب التعديل (إذا فيه سعر شراء متوفر)
-      let profit = sellPriceNum;
-      if (item.costPrice) {
-        profit = sellPriceNum - (item.costPrice * quantityNum);
-      }
-      item.profit = profit;
-
-      saveSalesDay(day, dayData);
-      loadSales();
-      renderSales();
-    }
-
-    // تنسيق الوقت (مثلاً: 14:32)
-    function formatTime(time) {
-      return time || "";
-    }
-
-    function renderSales() {
-      salesContainer.innerHTML = "";
-      salesData.forEach(({ day, data }, dayIndex) => {
-        let totalProfit = 0;
-        let totalSales = data.length;
-
-        data.forEach(item => {
-          totalProfit += parseFloat(item.profit ?? (item.sellPrice - (item.costPrice * item.quantity)));
-        });
-
-        const dayDiv = document.createElement("div");
-        dayDiv.className = "day";
-
-        const dayHeader = document.createElement("div");
-        dayHeader.className = "day-header";
-
-        const dayTitle = document.createElement("h3");
-        dayTitle.textContent = `📆 ${day}`;
-
-        const dayBtns = document.createElement("div");
-
-        const deleteDayBtn = document.createElement("button");
-        deleteDayBtn.className = "btn-delete";
-        deleteDayBtn.textContent = "🗑️ حذف اليوم";
-        deleteDayBtn.onclick = () => deleteDay(day);
-
-        dayBtns.appendChild(deleteDayBtn);
-        dayHeader.appendChild(dayTitle);
-        dayHeader.appendChild(dayBtns);
-
-        const summaryDiv = document.createElement("div");
-        summaryDiv.className = "day-summary";
-        summaryDiv.textContent = `عدد المبيعات: ${totalSales} — الربح الكلي: ${totalProfit.toFixed(0)} ل.س`;
-
-        const productsList = document.createElement("div");
-        productsList.className = "products-list";
-
-        data.forEach((item, index) => {
-          const productBox = document.createElement("div");
-          productBox.className = "product-box " + (index % 2 === 0 ? "red" : "blue");
-
-          const productTitle = document.createElement("h4");
-          productTitle.textContent = item.product;
-          productBox.appendChild(productTitle);
-
-          const info = document.createElement("div");
-          info.className = "product-info";
-          info.textContent =
-            `🔢 الكمية: ${item.quantity}\n` +
-            `💰 السعر الإجمالي: ${item.sellPrice} ل.س\n` +
-            `💵 الربح: ${parseFloat(item.profit ?? (item.sellPrice - (item.costPrice * item.quantity))).toFixed(0)} ل.س\n` +
-            `🕒 الوقت: ${formatTime(item.time)}`;
-          productBox.appendChild(info);
-
-          const btnGroup = document.createElement("div");
-          btnGroup.className = "btn-group";
-
-          const btnEdit = document.createElement("button");
-          btnEdit.className = "btn-edit";
-          btnEdit.textContent = "✏️ تعديل";
-          btnEdit.onclick = () => editProduct(day, index);
-
-          const btnDelete = document.createElement("button");
-          btnDelete.className = "btn-delete";
-          btnDelete.textContent = "🗑️ حذف";
-          btnDelete.onclick = () => deleteProduct(day, index);
-
-          btnGroup.appendChild(btnEdit);
-          btnGroup.appendChild(btnDelete);
-
-          productBox.appendChild(btnGroup);
-          productsList.appendChild(productBox);
-        });
-
-        dayDiv.appendChild(dayHeader);
-        dayDiv.appendChild(summaryDiv);
-        dayDiv.appendChild(productsList);
-
-        // زر تصدير
+  // تعديل المنتج - مودال
+  const editModal = document.getElementById("editModal");
+  const closeEditModalBtn = document.getElementById("closeEditModal");
+  const cancelEditBtn = document.getElementById("cancelEditBtn");
+  const editForm = document.getElementById("editForm");
