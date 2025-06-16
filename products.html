@@ -18,7 +18,6 @@
       text-align: center;
       margin-bottom: 20px;
       font-size: 28px;
-      position: relative;
     }
     form {
       max-width: 400px;
@@ -93,11 +92,12 @@
     .delete-btn:hover {
       background-color: #b30000;
     }
+
     /* زر الثلاث نقاط */
     #menuBtn {
       position: fixed;
       top: 20px;
-      left: 20px;
+      right: 20px;
       background: none;
       border: none;
       font-size: 28px;
@@ -105,13 +105,18 @@
       cursor: pointer;
       z-index: 1000;
       user-select: none;
+      outline: none;
     }
+    #menuBtn:focus {
+      outline: none;
+    }
+
     /* قائمة التنقل المنسدلة */
     #dropdownMenu {
       display: none;
       position: fixed;
       top: 60px;
-      left: 20px;
+      right: 20px;
       background-color: #222;
       border-radius: 10px;
       box-shadow: 0 0 10px #000;
@@ -138,7 +143,9 @@
 </head>
 <body>
 
+  <!-- زر القائمة -->
   <button id="menuBtn">⋮</button>
+  <!-- القائمة المنسدلة -->
   <div id="dropdownMenu">
     <a href="index.html">الصفحة الرئيسية</a>
     <a href="sales.html">سجل المبيعات</a>
@@ -176,7 +183,6 @@
     const productCostInput = document.getElementById("productCost");
     const productsTableBody = document.querySelector("#productsTable tbody");
 
-    // المنتجات مخزنة في localStorage ككائن
     let products = JSON.parse(localStorage.getItem("products")) || {};
 
     function updateTable() {
@@ -197,7 +203,7 @@
         btnDelete.textContent = "حذف";
         btnDelete.className = "delete-btn";
         btnDelete.onclick = () => {
-          if(confirm(`هل تريد حذف المنتج "${name}"؟`)){
+          if (confirm(`هل تريد حذف المنتج "${name}"؟`)) {
             delete products[name];
             saveProducts();
             updateTable();
@@ -238,22 +244,18 @@
 
     updateTable();
 
-    // قائمة التنقل
+    // القائمة المنسدلة
     const menuBtn = document.getElementById("menuBtn");
     const dropdownMenu = document.getElementById("dropdownMenu");
     const closeMenuLink = document.getElementById("closeMenu");
 
     menuBtn.addEventListener("click", (e) => {
-      e.stopPropagation();  // منع انتقال الحدث لأعلى DOM
-      if (dropdownMenu.style.display === "block") {
-        dropdownMenu.style.display = "none";
-      } else {
-        dropdownMenu.style.display = "block";
-      }
+      e.stopPropagation();
+      dropdownMenu.style.display = dropdownMenu.style.display === "block" ? "none" : "block";
     });
 
     dropdownMenu.addEventListener("click", (e) => {
-      e.stopPropagation();  // منع إغلاق القائمة عند الضغط بداخلها
+      e.stopPropagation();
     });
 
     closeMenuLink.addEventListener("click", (e) => {
@@ -261,7 +263,6 @@
       dropdownMenu.style.display = "none";
     });
 
-    // إغلاق القائمة لو ضغطت خارجها
     document.addEventListener("click", () => {
       dropdownMenu.style.display = "none";
     });
