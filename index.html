@@ -27,15 +27,15 @@
       flex-wrap: wrap;
     }
     .box {
-  background-color: #222;
-  padding: 30px;
-  border-radius: 20px;
-  width: 200px;
-  text-align: center;
-  box-shadow:
-    0 0 8px #ff0000,      /* نيون أحمر خارجي */
-    inset 0 0 10px #ff0000; /* توهّج داخلي */
-  font-size: 20px;
+      background-color: #222;
+      padding: 30px;
+      border-radius: 20px;
+      width: 200px;
+      text-align: center;
+      box-shadow:
+        0 0 8px #ff0000,      /* نيون أحمر خارجي */
+        inset 0 0 10px #ff0000; /* توهّج داخلي */
+      font-size: 20px;
     }
     input[type="number"], select {
       width: 100%;
@@ -128,7 +128,7 @@
     </div>
     <div class="box">
       العدد
-      <input type="number" id="quantityInput" min="1" value="1" />
+      <input type="number" id="quantityInput" min="1" value="" placeholder="ادخل العدد" />
     </div>
     <div class="box">
       إجمالي السعر (سعر البيع)
@@ -202,8 +202,16 @@
       const prod = productSelect.value;
       const qty = parseInt(quantityInput.value);
       const sellPrice = parseFloat(totalPriceInput.value);
-      if (!prod || qty <= 0 || sellPrice <= 0) {
-        alert("يرجى إدخال البيانات بشكل صحيح");
+      if (!prod) {
+        alert("يرجى اختيار المنتج");
+        return;
+      }
+      if (!qty || qty <= 0) {
+        alert("العدد غير معرف");
+        return;
+      }
+      if (!sellPrice || sellPrice <= 0) {
+        alert("يرجى إدخال سعر البيع بشكل صحيح");
         return;
       }
 
@@ -226,7 +234,7 @@
       updateSummary();
 
       productSelect.value = "";
-      quantityInput.value = 1;
+      quantityInput.value = "";
       totalPriceInput.value = "";
       profitDisplay.textContent = "0";
     }
