@@ -18,6 +18,7 @@
       text-align: center;
       margin-bottom: 20px;
       font-size: 28px;
+      position: relative;
     }
     form {
       max-width: 400px;
@@ -92,12 +93,10 @@
     .delete-btn:hover {
       background-color: #b30000;
     }
-
-    /* زر الثلاث نقاط */
     #menuBtn {
       position: fixed;
       top: 20px;
-      right: 20px;
+      left: 20px;
       background: none;
       border: none;
       font-size: 28px;
@@ -106,17 +105,13 @@
       z-index: 1000;
       user-select: none;
       outline: none;
+      padding: 0;
     }
-    #menuBtn:focus {
-      outline: none;
-    }
-
-    /* قائمة التنقل المنسدلة */
     #dropdownMenu {
       display: none;
       position: fixed;
       top: 60px;
-      right: 20px;
+      left: 20px;
       background-color: #222;
       border-radius: 10px;
       box-shadow: 0 0 10px #000;
@@ -143,9 +138,7 @@
 </head>
 <body>
 
-  <!-- زر القائمة -->
   <button id="menuBtn">⋮</button>
-  <!-- القائمة المنسدلة -->
   <div id="dropdownMenu">
     <a href="index.html">الصفحة الرئيسية</a>
     <a href="sales.html">سجل المبيعات</a>
@@ -173,7 +166,6 @@
       </tr>
     </thead>
     <tbody>
-      <!-- المنتجات تظهر هنا -->
     </tbody>
   </table>
 
@@ -203,7 +195,7 @@
         btnDelete.textContent = "حذف";
         btnDelete.className = "delete-btn";
         btnDelete.onclick = () => {
-          if (confirm(`هل تريد حذف المنتج "${name}"؟`)) {
+          if(confirm(`هل تريد حذف المنتج "${name}"؟`)){
             delete products[name];
             saveProducts();
             updateTable();
@@ -244,7 +236,6 @@
 
     updateTable();
 
-    // القائمة المنسدلة
     const menuBtn = document.getElementById("menuBtn");
     const dropdownMenu = document.getElementById("dropdownMenu");
     const closeMenuLink = document.getElementById("closeMenu");
