@@ -74,13 +74,30 @@
       margin-bottom: 10px;
       color: #aaa;
     }
-    pre {
-      background-color: #333;
+    .product-box {
       padding: 10px;
       border-radius: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      word-wrap: break-word;
+      margin-bottom: 10px;
+      background-color: #333;
+    }
+    .delete-day-btn, .delete-product-btn, .edit-product-btn {
+      background-color: crimson;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-left: 5px;
+    }
+    .delete-day-btn:hover, .delete-product-btn:hover, .edit-product-btn:hover {
+      background-color: #b30000;
+    }
+    .edit-product-btn {
+      background-color: #4444aa;
+    }
+    .edit-product-btn:hover {
+      background-color: #333399;
     }
     #exportBtn {
       background-color: #0066cc;
@@ -91,28 +108,11 @@
       border-radius: 10px;
       cursor: pointer;
       box-shadow: 0 0 8px #005bb5;
-      margin-bottom: 15px;
+      margin: 0 auto 15px auto;
       display: block;
-      margin-left: auto;
-      margin-right: auto;
-      transition: background-color 0.3s;
     }
     #exportBtn:hover {
       background-color: #004d99;
-    }
-    .delete-btn {
-      background-color: crimson;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      float: left;
-      margin-top: -30px;
-    }
-    .delete-btn:hover {
-      background-color: #b30000;
     }
   </style>
 </head>
@@ -137,9 +137,10 @@
   <script>
     const salesDiv = document.getElementById("sales");
     const exportBtn = document.getElementById("exportBtn");
-    const salesData = [];
+    const colors = ["#cc2222", "#2266cc", "#22aa55", "#ccaa22", "#8822cc"];
+    let colorIndex = 0;
 
-    // قراءة جميع المفاتيح التي تبدأ بـ sales-
+    const salesData = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith("sales-")) {
@@ -149,7 +150,6 @@
       }
     }
 
-    // ترتيب من الأحدث إلى الأقدم
     salesData.sort((a, b) => b.day.localeCompare(a.day));
 
     salesData.forEach(({ day, data }) => {
@@ -158,56 +158,89 @@
 
       let totalProfit = 0;
       let totalSales = 0;
-      let text = "";
 
-      data.forEach(item => {
+      const productsHtml = data.map((item, i) => {
         const profit = parseFloat(item.profit || (item.sellPrice - (item.costPrice * item.quantity)));
         totalProfit += profit;
         totalSales += 1;
-        text += `📦 المنتج: ${item.product}\n🔢 الكمية: ${item.quantity}\n💰 السعر الإجمالي: ${item.sellPrice} ل.س\n💵 الربح: ${profit.toFixed(0)} ل.س\n🕒 الوقت: ${item.time}\n\n`;
-      });
+        const color = colors[colorIndex % colors.length];
+        colorIndex++;
+
+        return `
+          <div class="product-box" style="background-color: ${color}">
+            <strong>📦 ${item.product}</strong><br>
+            🔢 الكمية: ${item.quantity}<br>
+            💰 السعر الإجمالي: ${item.sellPrice} ل.س<br>
+            💵 الربح: ${profit.toFixed(0)} ل.س<br>
+            🕒 ${item.time}<br>
+            <button class="edit-product-btn" onclick="editProduct('${day}', ${i})">✏️ تعديل</button>
+            <button class="delete-product-btn" onclick="deleteProduct('${day}', ${i})">🗑️ حذف</button>
+          </div>
+        `;
+      }).join("");
 
       container.innerHTML = `
-        <button class="delete-btn" onclick="deleteDay('${day}')">🗑️ حذف هذا اليوم</button>
+        <button class="delete-day-btn" onclick="deleteDay('${day}')">🗑️ حذف اليوم</button>
         <h3>📆 ${day}</h3>
         <div class="summary">عدد المبيعات: ${totalSales} — الربح الكلي: ${totalProfit.toFixed(0)} ل.س</div>
-        <pre>${text}</pre>
+        ${productsHtml}
       `;
-
       salesDiv.appendChild(container);
     });
+
+    function deleteDay(day) {
+      if (confirm(`هل تريد حذف كل المبيعات في يوم ${day}؟`)) {
+        localStorage.removeItem("sales-" + day);
+        location.reload();
+      }
+    }
+
+    function deleteProduct(day, index) {
+      const data = JSON.parse(localStorage.getItem("sales-" + day));
+      if (!data || !data[index]) return;
+      if (confirm(`هل تريد حذف المنتج "${data[index].product}"؟`)) {
+        data.splice(index, 1);
+        localStorage.setItem("sales-" + day, JSON.stringify(data));
+        location.reload();
+      }
+    }
+
+    function editProduct(day, index) {
+      const data = JSON.parse(localStorage.getItem("sales-" + day));
+      const item = data[index];
+      const newQuantity = prompt("🔢 الكمية الجديدة:", item.quantity);
+      const newSellPrice = prompt("💰 السعر الإجمالي الجديد:", item.sellPrice);
+      if (newQuantity && newSellPrice) {
+        item.quantity = parseFloat(newQuantity);
+        item.sellPrice = parseFloat(newSellPrice);
+        localStorage.setItem("sales-" + day, JSON.stringify(data));
+        location.reload();
+      }
+    }
 
     exportBtn.addEventListener("click", () => {
       const exportObj = {};
       salesData.forEach(({ day, data }) => {
         exportObj[day] = data;
       });
-
-      const jsonStr = JSON.stringify(exportObj, null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-
+      const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: "application/json" });
       const a = document.createElement("a");
-      a.href = url;
+      a.href = URL.createObjectURL(blob);
       a.download = "sales-data.json";
       a.click();
-
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(a.href);
     });
-
-    function deleteDay(day) {
-      const confirmDelete = confirm(`هل أنت متأكد أنك تريد حذف المبيعات ليوم ${day}؟`);
-      if (!confirmDelete) return;
-
-      localStorage.removeItem("sales-" + day);
-      localStorage.removeItem("profit-" + day);
-      location.reload();
-    }
 
     function toggleMenu() {
       const menu = document.getElementById("menu");
       menu.style.display = menu.style.display === "block" ? "none" : "block";
     }
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".top-bar")) {
+        document.getElementById("menu").style.display = "none";
+      }
+    });
   </script>
 
 </body>
