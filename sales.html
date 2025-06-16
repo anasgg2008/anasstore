@@ -134,7 +134,18 @@
   <div class="note">🗂️ تحتوي هذه الصفحة على كل المبيعات التي تم حفظها من جهازك حسب الأيام.</div>
 
   <button id="exportAllBtn">📤 تصدير كل البيانات كـ JSON</button>
-  <div id="sales"></div><script>
+  <div id="sales"></div>
+
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      if (menu.style.display === "block") {
+        menu.style.display = "none";
+      } else {
+        menu.style.display = "block";
+      }
+    }
+
     const salesDiv = document.getElementById("sales");
     const colors = ["#cc2222", "#2266cc", "#22aa55", "#ccaa22", "#8822cc"];
     let colorIndex = 0;
@@ -214,84 +225,110 @@
       `;
 
       salesDiv.appendChild(monthBox);
-    }// حذف يوم كامل
-function deleteDay(day) {
-  if (confirm(`هل تريد حذف كل المبيعات في يوم ${day}؟`)) {
-    localStorage.removeItem("sales-" + day);
-    location.reload();
-  }
-}
-
-// حذف منتج من يوم محدد
-function deleteProduct(day, index) {
-  const data = JSON.parse(localStorage.getItem("sales-" + day));
-  if (!data || !data[index]) return;
-  if (confirm(`هل تريد حذف المنتج "${data[index].product}"؟`)) {
-    data.splice(index, 1);
-    if (data.length === 0) {
-      localStorage.removeItem("sales-" + day);
-    } else {
-      localStorage.setItem("sales-" + day, JSON.stringify(data));
     }
-    location.reload();
-  }
-}
 
-// تعديل منتج
-function editProduct(day, index) {
-  const data = JSON.parse(localStorage.getItem("sales-" + day));
-  const item = data[index];
-  const newQuantity = prompt("🔢 الكمية الجديدة:", item.quantity);
-  const newSellPrice = prompt("💰 السعر الإجمالي الجديد:", item.sellPrice);
-  if (newQuantity && newSellPrice) {
-    item.quantity = parseFloat(newQuantity);
-    item.sellPrice = parseFloat(newSellPrice);
-    localStorage.setItem("sales-" + day, JSON.stringify(data));
-    location.reload();
-  }
-}
-
-// نسخ نص للحافظة
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert("تم نسخ النص!");
-  }).catch(() => {
-    alert("حدث خطأ أثناء النسخ.");
-  });
-}
-
-// تصدير بيانات يوم واحد كـ JSON
-function exportJSON(key, filename) {
-  const data = localStorage.getItem(key);
-  if (!data) {
-    alert("لا توجد بيانات للتصدير.");
-    return;
-  }
-  const blob = new Blob([data], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = filename + ".json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-// تصدير بيانات شهر كامل كـ JSON
-function exportMonth(month) {
-  const monthData = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith("sales-" + month)) {
-      monthData[key] = JSON.parse(localStorage.getItem(key));
+    // حذف يوم كامل
+    function deleteDay(day) {
+      if (confirm(`هل تريد حذف كل المبيعات في يوم ${day}؟`)) {
+        localStorage.removeItem("sales-" + day);
+        location.reload();
+      }
     }
-  }
-  if (Object.keys(monthData).length === 0) {
-    alert("لا توجد بيانات للتصدير لهذا الشهر.");
-    return;
-  }
-  const blob = new Blob([JSON.stringify(monthData, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = month + "-sales.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
+
+    // حذف منتج من يوم محدد
+    function deleteProduct(day, index) {
+      const data = JSON.parse(localStorage.getItem("sales-" + day));
+      if (!data || !data[index]) return;
+      if (confirm(`هل تريد حذف المنتج "${data[index].product}"؟`)) {
+        data.splice(index, 1);
+        if (data.length === 0) {
+          localStorage.removeItem("sales-" + day);
+        } else {
+          localStorage.setItem("sales-" + day, JSON.stringify(data));
         }
+        location.reload();
+      }
+    }
+
+    // تعديل منتج
+    function editProduct(day, index) {
+      const data = JSON.parse(localStorage.getItem("sales-" + day));
+      const item = data[index];
+      const newQuantity = prompt("🔢 الكمية الجديدة:", item.quantity);
+      const newSellPrice = prompt("💰 السعر الإجمالي الجديد:", item.sellPrice);
+      if (newQuantity && newSellPrice) {
+        item.quantity = parseFloat(newQuantity);
+        item.sellPrice = parseFloat(newSellPrice);
+        localStorage.setItem("sales-" + day, JSON.stringify(data));
+        location.reload();
+      }
+    }
+
+    // نسخ نص للحافظة
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("تم نسخ النص!");
+      }).catch(() => {
+        alert("حدث خطأ أثناء النسخ.");
+      });
+    }
+
+    // تصدير بيانات يوم واحد كـ JSON
+    function exportJSON(key, filename) {
+      const data = localStorage.getItem(key);
+      if (!data) {
+        alert("لا توجد بيانات للتصدير.");
+        return;
+      }
+      const blob = new Blob([data], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename + ".json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // تصدير بيانات شهر كامل كـ JSON
+    function exportMonth(month) {
+      const monthData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("sales-" + month)) {
+          monthData[key] = JSON.parse(localStorage.getItem(key));
+        }
+      }
+      if (Object.keys(monthData).length === 0) {
+        alert("لا توجد بيانات للتصدير لهذا الشهر.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(monthData, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = month + "-sales.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // تصدير كل البيانات كـ JSON
+    document.getElementById("exportAllBtn").addEventListener("click", () => {
+      const allData = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("sales-")) {
+          allData[key] = JSON.parse(localStorage.getItem(key));
+        }
+      }
+      if (Object.keys(allData).length === 0) {
+        alert("لا توجد بيانات للتصدير.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(allData, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "all-sales.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  </script>
+</body>
+</html>
